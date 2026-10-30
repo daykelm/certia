@@ -3,26 +3,26 @@
  * of the catalog's fichas.
  */
 import { eq } from "drizzle-orm";
-import { cargarCatalogo } from "@certia/fichas";
-import { crearDb } from "./index.js";
+import { loadCatalog } from "@certia/fichas";
+import { createDb } from "./index.js";
 import { organizations, userRoles, users } from "./schema.js";
-import { sincronizarFichas } from "./sincronizar-fichas.js";
+import { syncFichas } from "./sync-fichas.js";
 
-const email = process.env.DEV_USER_EMAIL ?? "admin@example.com";
-const dominio = email.split("@")[1] ?? "example.com";
+const email = process.env.DEV_USER_EMAIL ?? "admin@certia-es.com";
+const domain = email.split("@")[1] ?? "certia-es.com";
 
-const { db, pool } = crearDb();
+const { db, pool } = createDb();
 try {
-  let [org] = await db.select().from(organizations).where(eq(organizations.dominio, dominio));
+  let [org] = await db.select().from(organizations).where(eq(organizations.domain, domain));
   if (!org) {
-    [org] = await db.insert(organizations).values({ nombre: "Organización de desarrollo", dominio }).returning();
-    console.log(`Organization created: ${dominio}`);
+    [org] = await db.insert(organizations).values({ name: "Development organization", domain }).returning();
+    console.log(`Organization created: ${domain}`);
   }
   if (!org) throw new Error("Could not create the organization");
 
   let [admin] = await db.select().from(users).where(eq(users.email, email));
   if (!admin) {
-    [admin] = await db.insert(users).values({ organizationId: org.id, email, nombre: "Administrador" }).returning();
+    [admin] = await db.insert(users).values({ organizationId: org.id, email, name: "Administrator" }).returning();
     console.log(`User created: ${email}`);
   }
   if (!admin) throw new Error("Could not create the user");
@@ -30,11 +30,11 @@ try {
   const adminId = admin.id;
   await db
     .insert(userRoles)
-    .values(["admin", "direccion", "gestion", "verificacion"].map((rol) => ({ userId: adminId, rol })))
+    .values(["admin", "director", "case_manager", "verifier"].map((role) => ({ userId: adminId, role })))
     .onConflictDoNothing();
 
-  const r = await sincronizarFichas(db, cargarCatalogo().todas());
-  console.log(`Fichas published: ${r.nuevas.join(", ") || "none new"}`);
+  const r = await syncFichas(db, loadCatalog().all());
+  console.log(`Fichas published: ${r.added.join(", ") || "none new"}`);
 } finally {
   await pool.end();
 }

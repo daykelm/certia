@@ -1,0 +1,93 @@
+# ⚠️ SAMPLE TEMPLATE — illustrative values.
+# Replace code, factors, formula and documents with those of the official ficha.
+# Illustrates a new version adding parameters (scrappage) and a conditional document.
+code: TRA-VE
+version: 2
+name: Vehículo eléctrico (versión vigente)
+description: Sustitución o adquisición de un vehículo eléctrico.
+validity:
+  from: "2026-01-01"
+
+fields:
+  - id: tipo_vehiculo
+    label: Categoría del vehículo
+    type: enum
+    options: [M1, N1]
+    source: document:ficha_tecnica
+  - id: matricula
+    label: Matrícula
+    type: text
+    source: document:permiso_circulacion
+  - id: fecha_matriculacion
+    label: Fecha de matriculación
+    type: date
+    source: document:permiso_circulacion
+  - id: achatarramiento
+    label: ¿Se achatarró un vehículo de combustión?
+    type: boolean
+  - id: km_anuales
+    label: Kilómetros anuales estimados
+    type: integer
+    unit: km
+    min: 0
+    max: 100000
+    required: false
+
+constants:
+  ahorro_anual_kwh:
+    M1: 600
+    N1: 900
+  vida_util_anios: 10
+  factor_achatarramiento: 1.15
+
+calculation:
+  formula: "ahorro_anual_kwh[tipo_vehiculo] * vida_util_anios * (achatarramiento ? factor_achatarramiento : 1)"
+
+tests:
+  - description: Turismo M1 sin achatarramiento
+    input: { tipo_vehiculo: M1, matricula: "1234ABC", fecha_matriculacion: "2026-02-10", achatarramiento: false }
+    expected_kwh: 6000
+  - description: Turismo M1 con achatarramiento
+    input: { tipo_vehiculo: M1, matricula: "1234ABC", fecha_matriculacion: "2026-02-10", achatarramiento: true }
+    expected_kwh: 6900
+
+documents:
+  - type: dni
+    label: DNI o NIE del titular
+  - type: permiso_circulacion
+    label: Permiso de circulación
+    extract: [matricula, fecha_matriculacion]
+  - type: ficha_tecnica
+    label: Ficha técnica del vehículo
+    extract: [tipo_vehiculo]
+  - type: factura_compra
+    label: Factura de compra
+  - type: certificado_baja
+    label: Certificado de baja del vehículo achatarrado
+    condition: achatarramiento
+  - type: acuerdo_cesion
+    label: Acuerdo de cesión de ahorros
+    generated: true
+  - type: declaracion_responsable
+    label: Declaración responsable
+    generated: true
+
+grouping:
+  required: true
+  keys: [region, year]
+  min_kwh: 30000
+
+templates:
+  - id: acuerdo_cesion
+    document: acuerdo_cesion
+    file: templates/electric-vehicle/acuerdo_cesion_v2.docx
+    optional_clauses:
+      - id: clausula_transitoria
+        label: Cláusula transitoria
+  - id: declaracion_responsable
+    document: declaracion_responsable
+    file: templates/electric-vehicle/declaracion_responsable_v2.docx
+
+packaging:
+  max_size_mb: 10
+  name_pattern: "{reference}_{type}"

@@ -1,19 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { ejecutarPruebas } from "@certia/core";
-import { cargarCatalogo } from "./index.js";
+import { runTests } from "@certia/core";
+import { loadCatalog } from "./index.js";
 
 describe("ficha catalog", () => {
-  const catalogo = cargarCatalogo();
+  const catalog = loadCatalog();
 
   it("loads the definitions and their tests pass", () => {
-    expect(catalogo.todas().length).toBeGreaterThan(0);
-    for (const ficha of catalogo.todas()) {
-      expect(ejecutarPruebas(ficha).every((p) => p.ok), `${ficha.codigo} v${ficha.version}`).toBe(true);
+    expect(catalog.all().length).toBeGreaterThan(0);
+    for (const ficha of catalog.all()) {
+      expect(runTests(ficha).every((t) => t.ok), `${ficha.code} v${ficha.version}`).toBe(true);
     }
   });
 
   it("resolves the version in force by date", () => {
-    expect(catalogo.vigente("TRA-VE", "2025-06-01")?.version).toBe(1);
-    expect(catalogo.vigente("TRA-VE", "2026-03-01")?.version).toBe(2);
+    expect(catalog.inForce("TRA-VE", "2025-06-01")?.version).toBe(1);
+    expect(catalog.inForce("TRA-VE", "2026-03-01")?.version).toBe(2);
   });
 });

@@ -21,7 +21,7 @@ jobs:
           --health-interval 5s --health-timeout 3s --health-retries 10
     env:
       DATABASE_URL: postgres://certia:certia@localhost:5432/certia
-      DEV_USER_EMAIL: admin@example.com
+      DEV_USER_EMAIL: admin@certia-es.com
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
@@ -39,23 +39,23 @@ jobs:
       # so a single run reports all problems.
       - name: Lint
         if: ${{ !cancelled() }}
-        run: .github/scripts/paso.sh Lint pnpm exec eslint .
+        run: .github/scripts/step.sh Lint pnpm exec eslint .
       - name: Types
         if: ${{ !cancelled() }}
-        run: .github/scripts/paso.sh Types pnpm -r --no-bail typecheck
+        run: .github/scripts/step.sh Types pnpm -r --no-bail typecheck
       - name: Fichas
         if: ${{ !cancelled() }}
-        run: .github/scripts/paso.sh Fichas pnpm fichas:check
+        run: .github/scripts/step.sh Fichas pnpm fichas:check
       - name: Tests
         if: ${{ !cancelled() }}
-        run: .github/scripts/paso.sh Tests pnpm test
+        run: .github/scripts/step.sh Tests pnpm test
       - name: Migrations and seed data
         if: ${{ !cancelled() }}
         # db:generate creates the initial migration if it is not in the repo yet.
-        run: .github/scripts/paso.sh Migrations bash -c "pnpm db:generate && pnpm db:migrate && pnpm db:seed"
+        run: .github/scripts/step.sh Migrations bash -c "pnpm db:generate && pnpm db:migrate && pnpm db:seed"
       - name: Build
         if: ${{ !cancelled() }}
-        run: .github/scripts/paso.sh Build pnpm build
+        run: .github/scripts/step.sh Build pnpm build
 
   # TODO: deploy to staging on Cloud Run (Artifact Registry + migrations + deploy)
   # once the Google Cloud project exists. See README.md, "Deployment".

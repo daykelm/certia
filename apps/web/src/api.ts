@@ -1,20 +1,20 @@
-export class ErrorApi extends Error {
+export class ApiError extends Error {
   constructor(
     message: string,
-    public readonly detalles: string[] = [],
+    public readonly details: string[] = [],
   ) {
     super(message);
   }
 }
 
-export async function api<T>(ruta: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`/api${ruta}`, {
+export async function api<T>(path: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(`/api${path}`, {
     ...init,
     headers: { "content-type": "application/json", ...init?.headers },
   });
-  const cuerpo = await res.json().catch(() => ({}));
-  if (!res.ok) throw new ErrorApi(cuerpo.error ?? `Error ${res.status}`, cuerpo.detalles);
-  return cuerpo as T;
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new ApiError(body.error ?? `Error ${res.status}`, body.details);
+  return body as T;
 }
 
-export const post = <T>(ruta: string, cuerpo: unknown) => api<T>(ruta, { method: "POST", body: JSON.stringify(cuerpo) });
+export const post = <T>(path: string, body: unknown) => api<T>(path, { method: "POST", body: JSON.stringify(body) });

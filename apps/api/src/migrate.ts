@@ -1,5 +1,5 @@
 // Applies migrations from the Docker image (APP_MODE=migrate).
-import { aplicarMigraciones } from "@certia/db";
+import { runMigrations } from "@certia/db";
 
-await aplicarMigraciones();
+await runMigrations();
 console.log("Migrations applied.");

@@ -1,31 +1,30 @@
-import type { ConversorPdf } from "./interfaces.js";
+import type { PdfConverter } from "./interfaces.js";
 
 /** PDF conversion with Gotenberg (https://gotenberg.dev). */
-export class ConversorGotenberg implements ConversorPdf {
+export class GotenbergConverter implements PdfConverter {
   constructor(private readonly url: string) {}
 
-  private async enviar(ruta: string, archivos: { nombre: string; contenido: Buffer }[]): Promise<Buffer> {
+  private async post(route: string, files: { name: string; content: Buffer }[]): Promise<Buffer> {
     const form = new FormData();
-    for (const a of archivos) form.append("files", new Blob([new Uint8Array(a.contenido)]), a.nombre);
-    const res = await fetch(`${this.url}${ruta}`, { method: "POST", body: form });
+    for (const f of files) form.append("files", new Blob([new Uint8Array(f.content)]), f.name);
+    const res = await fetch(`${this.url}${route}`, { method: "POST", body: form });
     if (!res.ok) throw new Error(`Gotenberg answered ${res.status}: ${await res.text()}`);
     return Buffer.from(await res.arrayBuffer());
   }
 
-  aPdf(archivo: { nombre: string; contenido: Buffer }) {
-    const extension = archivo.nombre.split(".").pop()?.toLowerCase() ?? "";
-    if (extension === "pdf") return Promise.resolve(archivo.contenido);
-    const esImagen = ["jpg", "jpeg", "png", "gif", "bmp", "tif", "tiff", "webp"].includes(extension);
+  toPdf(file: { name: string; content: Buffer }) {
+    const extension = file.name.split(".").pop()?.toLowerCase() ?? "";
+    if (extension === "pdf") return Promise.resolve(file.content);
     // LibreOffice converts both office documents and images.
-    return this.enviar("/forms/libreoffice/convert", [archivo]).catch((e) => {
-      throw new Error(`Could not convert ${esImagen ? "image" : "document"} ${archivo.nombre}: ${e.message}`);
+    return this.post("/forms/libreoffice/convert", [file]).catch((e: Error) => {
+      throw new Error(`Could not convert ${file.name}: ${e.message}`);
     });
   }
 
-  unir(pdfs: Buffer[]) {
-    return this.enviar(
+  merge(pdfs: Buffer[]) {
+    return this.post(
       "/forms/pdfengines/merge",
-      pdfs.map((contenido, i) => ({ nombre: `${String(i).padStart(4, "0")}.pdf`, contenido })),
+      pdfs.map((content, i) => ({ name: `${String(i).padStart(4, "0")}.pdf`, content })),
     );
   }
 }

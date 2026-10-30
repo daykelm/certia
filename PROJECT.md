@@ -131,7 +131,7 @@ Las condiciones de cada transición (por ejemplo, "checklist validado") se defin
 | D4 | **Postgres como única fuente de verdad**; datos específicos de la ficha en JSONB validado | Elimina las hojas de cálculo como intermediarias |
 | D5 | **Tabla de eventos** para cada cambio | Historial, auditoría, semáforo y KPIs sin doble escritura |
 | D6 | **`core` sin dependencias de infraestructura**; integraciones detrás de `adapters` | Lógica de negocio testeable y portabilidad entre proveedores |
-| D7 | **Google Cloud** (Cloud Run, Cloud SQL, Cloud Storage) en Madrid | El cliente ya usa Google Workspace; un solo proveedor y datos en España |
+| D7 | **Google Cloud** (Cloud Run, Cloud SQL, Cloud Storage) en Madrid, dominio **certia-es.com** | El cliente ya usa Google Workspace; un solo proveedor y datos en España |
 | D8 | **Login con Google** limitado al dominio de la empresa | Altas y bajas gestionadas desde Workspace, sin contraseñas propias |
 | D9 | **Cifrado de DNI e IBAN a nivel de aplicación** con clave en Cloud KMS | Una copia de la base de datos no expone esos datos |
 | D10 | **`organization_id` en todas las tablas** desde el primer día | Permite multiempresa sin migraciones futuras |
@@ -156,19 +156,21 @@ flowchart LR
 
 ## 8. Modelo de datos (resumen)
 
-| Entidad | Contenido principal |
+El código, las tablas y las columnas están en inglés; los términos del dominio sin buena traducción (ficha, expediente, lote) se mantienen en español.
+
+| Tabla | Contenido principal |
 |---|---|
 | `organizations` | Empresa usuaria |
 | `users`, `user_roles` | Usuarios y roles |
 | `contacts` | Beneficiarios (datos sensibles cifrados) |
 | `leads` | Origen, canal, estado de contacto |
 | `ficha_versions` | Código, versión, vigencia, hash de la definición |
-| `actuaciones` | Expediente: contacto, ficha y versión, estado, comunidad autónoma, año, `data` (JSONB), ahorro calculado, responsable |
+| `expedientes` | Expediente: contacto, ficha y versión, estado, comunidad autónoma, año, `data` (JSONB), ahorro calculado, responsable |
 | `documents` | Tipo, archivo, datos extraídos, confianza, estado de validación |
 | `generated_documents` | Documentos generados, plantilla y opciones usadas |
-| `lotes`, `lote_actuaciones` | Agrupaciones, estado, verificador, totales |
+| `lotes`, `lote_expedientes` | Agrupaciones, estado, verificador, totales |
 | `tasks` | Subsanaciones y tareas: origen, responsable, prioridad, vencimiento |
-| `events` | Quién, qué, cuándo y sobre qué entidad (append-only) |
+| `events` | Quién, qué, cuándo y sobre qué entidad (solo se añaden registros) |
 | `objectives` | Objetivos mensuales por usuario |
 
 El esquema detallado vive en `packages/db`.

@@ -26,7 +26,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-l
 FROM node:22-slim AS runtime
 ENV NODE_ENV=production \
     PORT=8080 \
-    FICHAS_DIR=/app/packages/fichas/definiciones \
+    FICHAS_DIR=/app/packages/fichas/definitions \
     MIGRATIONS_DIR=/app/packages/db/migrations \
     WEB_DIR=/app/apps/web/dist
 WORKDIR /app
@@ -34,7 +34,7 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/apps/api/dist ./apps/api/dist
 COPY --from=build /app/apps/worker/dist ./apps/worker/dist
 COPY --from=build /app/apps/web/dist ./apps/web/dist
-COPY --from=build /app/packages/fichas/definiciones ./packages/fichas/definiciones
+COPY --from=build /app/packages/fichas/definitions ./packages/fichas/definitions
 COPY --from=build /app/packages/db/migrations ./packages/db/migrations
 COPY docker/start.mjs ./start.mjs
 USER node

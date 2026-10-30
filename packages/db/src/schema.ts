@@ -20,8 +20,8 @@ import {
  *
  * Conventions:
  * - Every business table has organization_id (decision D10).
- * - Ficha-specific data lives in `datos` (JSONB) and is validated against the ficha.
- * - *_cifrado columns hold values encrypted at the application level (F-16).
+ * - Ficha-specific data lives in `data` (JSONB) and is validated against the ficha.
+ * - *_encrypted columns hold values encrypted at the application level (F-16).
  * - Every relevant change is recorded in `events` (F-02).
  */
 
@@ -30,14 +30,14 @@ const org = () =>
   uuid("organization_id")
     .notNull()
     .references(() => organizations.id);
-const creado = () => timestamp("created_at", { withTimezone: true }).notNull().defaultNow();
-const actualizado = () => timestamp("updated_at", { withTimezone: true }).notNull().defaultNow();
+const createdAt = () => timestamp("created_at", { withTimezone: true }).notNull().defaultNow();
+const updatedAt = () => timestamp("updated_at", { withTimezone: true }).notNull().defaultNow();
 
 export const organizations = pgTable("organizations", {
   id: id(),
-  nombre: text("nombre").notNull(),
-  dominio: text("dominio").notNull().unique(),
-  createdAt: creado(),
+  name: text("name").notNull(),
+  domain: text("domain").notNull().unique(),
+  createdAt: createdAt(),
 });
 
 export const users = pgTable(
@@ -46,9 +46,9 @@ export const users = pgTable(
     id: id(),
     organizationId: org(),
     email: text("email").notNull(),
-    nombre: text("nombre").notNull(),
-    activo: boolean("activo").notNull().default(true),
-    createdAt: creado(),
+    name: text("name").notNull(),
+    active: boolean("active").notNull().default(true),
+    createdAt: createdAt(),
   },
   (t) => [uniqueIndex("users_org_email_uq").on(t.organizationId, t.email)],
 );
@@ -59,9 +59,9 @@ export const userRoles = pgTable(
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    rol: text("rol").notNull(),
+    role: text("role").notNull(),
   },
-  (t) => [primaryKey({ columns: [t.userId, t.rol] })],
+  (t) => [primaryKey({ columns: [t.userId, t.role] })],
 );
 
 export const contacts = pgTable(
@@ -69,17 +69,17 @@ export const contacts = pgTable(
   {
     id: id(),
     organizationId: org(),
-    nombre: text("nombre").notNull(),
-    apellidos: text("apellidos"),
+    firstName: text("first_name").notNull(),
+    lastName: text("last_name"),
     email: text("email"),
-    telefono: text("telefono"),
-    dniCifrado: text("dni_cifrado"),
+    phone: text("phone"),
+    dniEncrypted: text("dni_encrypted"),
     /** Keyed hash used to search by DNI without decrypting. */
     dniHash: text("dni_hash"),
-    ibanCifrado: text("iban_cifrado"),
-    titularCuentaCifrado: text("titular_cuenta_cifrado"),
-    createdAt: creado(),
-    updatedAt: actualizado(),
+    ibanEncrypted: text("iban_encrypted"),
+    accountHolderEncrypted: text("account_holder_encrypted"),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (t) => [index("contacts_org_dni_hash_idx").on(t.organizationId, t.dniHash)],
 );
@@ -90,14 +90,14 @@ export const leads = pgTable(
     id: id(),
     organizationId: org(),
     contactId: uuid("contact_id").references(() => contacts.id),
-    canal: text("canal"),
-    /** nuevo | contactado | convertido | descartado */
-    estado: text("estado").notNull().default("nuevo"),
-    datos: jsonb("datos").$type<Record<string, unknown>>().notNull().default({}),
-    createdAt: creado(),
-    updatedAt: actualizado(),
+    channel: text("channel"),
+    /** new | contacted | converted | discarded */
+    status: text("status").notNull().default("new"),
+    data: jsonb("data").$type<Record<string, unknown>>().notNull().default({}),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
-  (t) => [index("leads_org_estado_idx").on(t.organizationId, t.estado)],
+  (t) => [index("leads_org_status_idx").on(t.organizationId, t.status)],
 );
 
 /** Published copy of each ficha version. Immutable (decision D3). */
@@ -105,43 +105,44 @@ export const fichaVersions = pgTable(
   "ficha_versions",
   {
     id: id(),
-    codigo: text("codigo").notNull(),
+    code: text("code").notNull(),
     version: integer("version").notNull(),
-    nombre: text("nombre").notNull(),
+    name: text("name").notNull(),
     hash: text("hash").notNull(),
-    definicion: jsonb("definicion").notNull(),
-    publicadaAt: timestamp("publicada_at", { withTimezone: true }).notNull().defaultNow(),
+    definition: jsonb("definition").notNull(),
+    publishedAt: timestamp("published_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [uniqueIndex("ficha_versions_codigo_version_uq").on(t.codigo, t.version)],
+  (t) => [uniqueIndex("ficha_versions_code_version_uq").on(t.code, t.version)],
 );
 
-export const actuaciones = pgTable(
-  "actuaciones",
+export const expedientes = pgTable(
+  "expedientes",
   {
     id: id(),
     organizationId: org(),
-    referencia: text("referencia").notNull(),
+    reference: text("reference").notNull(),
     contactId: uuid("contact_id")
       .notNull()
       .references(() => contacts.id),
     leadId: uuid("lead_id").references(() => leads.id),
-    fichaCodigo: text("ficha_codigo").notNull(),
+    fichaCode: text("ficha_code").notNull(),
     fichaVersion: integer("ficha_version").notNull(),
-    estado: text("estado").notNull().default("lead"),
-    /** Time of the last state change: drives the traffic light (F-13). */
-    estadoDesde: timestamp("estado_desde", { withTimezone: true }).notNull().defaultNow(),
-    comunidadAutonoma: text("comunidad_autonoma"),
-    anio: integer("anio"),
-    datos: jsonb("datos").$type<Record<string, unknown>>().notNull().default({}),
-    ahorroKwh: numeric("ahorro_kwh", { precision: 14, scale: 3, mode: "number" }),
-    responsableId: uuid("responsable_id").references(() => users.id),
-    createdAt: creado(),
-    updatedAt: actualizado(),
+    status: text("status").notNull().default("lead"),
+    /** Time of the last status change: drives the traffic light (F-13). */
+    statusSince: timestamp("status_since", { withTimezone: true }).notNull().defaultNow(),
+    /** Autonomous community (INE code). */
+    region: text("region"),
+    year: integer("year"),
+    data: jsonb("data").$type<Record<string, unknown>>().notNull().default({}),
+    savingsKwh: numeric("savings_kwh", { precision: 14, scale: 3, mode: "number" }),
+    assigneeId: uuid("assignee_id").references(() => users.id),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (t) => [
-    uniqueIndex("actuaciones_org_referencia_uq").on(t.organizationId, t.referencia),
-    index("actuaciones_org_estado_idx").on(t.organizationId, t.estado, t.estadoDesde),
-    index("actuaciones_agrupacion_idx").on(t.organizationId, t.fichaCodigo, t.comunidadAutonoma, t.anio),
+    uniqueIndex("expedientes_org_reference_uq").on(t.organizationId, t.reference),
+    index("expedientes_org_status_idx").on(t.organizationId, t.status, t.statusSince),
+    index("expedientes_grouping_idx").on(t.organizationId, t.fichaCode, t.region, t.year),
   ],
 );
 
@@ -150,39 +151,39 @@ export const documents = pgTable(
   {
     id: id(),
     organizationId: org(),
-    actuacionId: uuid("actuacion_id")
+    expedienteId: uuid("expediente_id")
       .notNull()
-      .references(() => actuaciones.id),
-    tipo: text("tipo").notNull(),
-    estado: text("estado").notNull().default("subido"),
-    nombreOriginal: text("nombre_original").notNull(),
-    rutaOriginal: text("ruta_original").notNull(),
-    rutaNormalizada: text("ruta_normalizada"),
+      .references(() => expedientes.id),
+    type: text("type").notNull(),
+    status: text("status").notNull().default("uploaded"),
+    originalName: text("original_name").notNull(),
+    originalPath: text("original_path").notNull(),
+    normalizedPath: text("normalized_path"),
     mime: text("mime"),
     bytes: integer("bytes"),
-    datosExtraidos: jsonb("datos_extraidos").$type<Record<string, unknown>>(),
-    confianza: jsonb("confianza").$type<Record<string, number>>(),
-    motivoRechazo: text("motivo_rechazo"),
+    extractedData: jsonb("extracted_data").$type<Record<string, unknown>>(),
+    confidence: jsonb("confidence").$type<Record<string, number>>(),
+    rejectionReason: text("rejection_reason"),
     /** Null when uploaded by the beneficiary through the portal. */
-    subidoPor: uuid("subido_por").references(() => users.id),
-    createdAt: creado(),
-    updatedAt: actualizado(),
+    uploadedBy: uuid("uploaded_by").references(() => users.id),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
-  (t) => [index("documents_actuacion_idx").on(t.actuacionId, t.tipo)],
+  (t) => [index("documents_expediente_idx").on(t.expedienteId, t.type)],
 );
 
 export const generatedDocuments = pgTable("generated_documents", {
   id: id(),
   organizationId: org(),
-  actuacionId: uuid("actuacion_id").references(() => actuaciones.id),
+  expedienteId: uuid("expediente_id").references(() => expedientes.id),
   loteId: uuid("lote_id").references(() => lotes.id),
-  plantillaId: text("plantilla_id").notNull(),
-  fichaCodigo: text("ficha_codigo").notNull(),
+  templateId: text("template_id").notNull(),
+  fichaCode: text("ficha_code").notNull(),
   fichaVersion: integer("ficha_version").notNull(),
-  opciones: jsonb("opciones").$type<Record<string, unknown>>().notNull().default({}),
-  ruta: text("ruta").notNull(),
+  options: jsonb("options").$type<Record<string, unknown>>().notNull().default({}),
+  path: text("path").notNull(),
   createdBy: uuid("created_by").references(() => users.id),
-  createdAt: creado(),
+  createdAt: createdAt(),
 });
 
 export const lotes = pgTable(
@@ -190,39 +191,39 @@ export const lotes = pgTable(
   {
     id: id(),
     organizationId: org(),
-    referencia: text("referencia").notNull(),
-    fichaCodigo: text("ficha_codigo").notNull(),
-    /** Grouping key values, e.g. { comunidad_autonoma, anio }. */
-    clave: jsonb("clave").$type<Record<string, string>>().notNull(),
-    estado: text("estado").notNull().default("borrador"),
-    estadoDesde: timestamp("estado_desde", { withTimezone: true }).notNull().defaultNow(),
-    verificador: text("verificador"),
+    reference: text("reference").notNull(),
+    fichaCode: text("ficha_code").notNull(),
+    /** Grouping key values, e.g. { region, year }. */
+    key: jsonb("key").$type<Record<string, string>>().notNull(),
+    status: text("status").notNull().default("draft"),
+    statusSince: timestamp("status_since", { withTimezone: true }).notNull().defaultNow(),
+    verifier: text("verifier"),
     totalKwh: numeric("total_kwh", { precision: 14, scale: 3, mode: "number" }).notNull().default(0),
-    responsableId: uuid("responsable_id").references(() => users.id),
-    createdAt: creado(),
-    updatedAt: actualizado(),
+    assigneeId: uuid("assignee_id").references(() => users.id),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (t) => [
-    uniqueIndex("lotes_org_referencia_uq").on(t.organizationId, t.referencia),
-    index("lotes_org_estado_idx").on(t.organizationId, t.estado, t.estadoDesde),
+    uniqueIndex("lotes_org_reference_uq").on(t.organizationId, t.reference),
+    index("lotes_org_status_idx").on(t.organizationId, t.status, t.statusSince),
   ],
 );
 
-export const loteActuaciones = pgTable(
-  "lote_actuaciones",
+export const loteExpedientes = pgTable(
+  "lote_expedientes",
   {
     loteId: uuid("lote_id")
       .notNull()
       .references(() => lotes.id, { onDelete: "cascade" }),
-    actuacionId: uuid("actuacion_id")
+    expedienteId: uuid("expediente_id")
       .notNull()
-      .references(() => actuaciones.id),
-    createdAt: creado(),
+      .references(() => expedientes.id),
+    createdAt: createdAt(),
   },
   (t) => [
-    primaryKey({ columns: [t.loteId, t.actuacionId] }),
+    primaryKey({ columns: [t.loteId, t.expedienteId] }),
     // An expediente can only belong to one lote.
-    uniqueIndex("lote_actuaciones_actuacion_uq").on(t.actuacionId),
+    uniqueIndex("lote_expedientes_expediente_uq").on(t.expedienteId),
   ],
 );
 
@@ -231,21 +232,21 @@ export const tasks = pgTable(
   {
     id: id(),
     organizationId: org(),
-    actuacionId: uuid("actuacion_id").references(() => actuaciones.id),
+    expedienteId: uuid("expediente_id").references(() => expedientes.id),
     loteId: uuid("lote_id").references(() => lotes.id),
-    titulo: text("titulo").notNull(),
-    descripcion: text("descripcion"),
-    origen: text("origen").notNull().default("interno"),
+    title: text("title").notNull(),
+    description: text("description"),
+    origin: text("origin").notNull().default("internal"),
     /** 1 = highest. */
-    prioridad: integer("prioridad").notNull().default(3),
-    responsableId: uuid("responsable_id").references(() => users.id),
-    venceAt: timestamp("vence_at", { withTimezone: true }),
-    abierta: boolean("abierta").notNull().default(true),
+    priority: integer("priority").notNull().default(3),
+    assigneeId: uuid("assignee_id").references(() => users.id),
+    dueAt: timestamp("due_at", { withTimezone: true }),
+    open: boolean("open").notNull().default(true),
     createdBy: uuid("created_by").references(() => users.id),
-    createdAt: creado(),
-    cerradaAt: timestamp("cerrada_at", { withTimezone: true }),
+    createdAt: createdAt(),
+    closedAt: timestamp("closed_at", { withTimezone: true }),
   },
-  (t) => [index("tasks_responsable_idx").on(t.organizationId, t.responsableId, t.abierta)],
+  (t) => [index("tasks_assignee_idx").on(t.organizationId, t.assigneeId, t.open)],
 );
 
 /** Append-only log of everything that happens (F-02). Source for history, traffic light and KPIs. */
@@ -254,16 +255,16 @@ export const events = pgTable(
   {
     id: bigserial("id", { mode: "number" }).primaryKey(),
     organizationId: org(),
-    entidad: text("entidad").notNull(),
-    entidadId: uuid("entidad_id").notNull(),
-    tipo: text("tipo").notNull(),
+    entity: text("entity").notNull(),
+    entityId: uuid("entity_id").notNull(),
+    type: text("type").notNull(),
     actorId: uuid("actor_id").references(() => users.id),
-    datos: jsonb("datos").$type<Record<string, unknown>>().notNull().default({}),
-    createdAt: creado(),
+    data: jsonb("data").$type<Record<string, unknown>>().notNull().default({}),
+    createdAt: createdAt(),
   },
   (t) => [
-    index("events_entidad_idx").on(t.entidad, t.entidadId, t.createdAt),
-    index("events_org_tipo_idx").on(t.organizationId, t.tipo, t.createdAt),
+    index("events_entity_idx").on(t.entity, t.entityId, t.createdAt),
+    index("events_org_type_idx").on(t.organizationId, t.type, t.createdAt),
   ],
 );
 
@@ -275,11 +276,11 @@ export const objectives = pgTable(
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id),
-    mes: date("mes").notNull(),
-    metrica: text("metrica").notNull(),
-    objetivo: integer("objetivo").notNull(),
+    month: date("month").notNull(),
+    metric: text("metric").notNull(),
+    target: integer("target").notNull(),
   },
-  (t) => [uniqueIndex("objectives_uq").on(t.userId, t.mes, t.metrica)],
+  (t) => [uniqueIndex("objectives_uq").on(t.userId, t.month, t.metric)],
 );
 
 /** Postgres-backed job queue for development and environments without Cloud Tasks. */
@@ -287,15 +288,15 @@ export const jobs = pgTable(
   "jobs",
   {
     id: bigserial("id", { mode: "number" }).primaryKey(),
-    tipo: text("tipo").notNull(),
+    type: text("type").notNull(),
     payload: jsonb("payload").$type<Record<string, unknown>>().notNull().default({}),
-    /** pendiente | en_curso | hecho | error */
-    estado: text("estado").notNull().default("pendiente"),
-    intentos: integer("intentos").notNull().default(0),
-    ejecutarDesde: timestamp("ejecutar_desde", { withTimezone: true }).notNull().defaultNow(),
+    /** pending | running | done | failed */
+    status: text("status").notNull().default("pending"),
+    attempts: integer("attempts").notNull().default(0),
+    runAt: timestamp("run_at", { withTimezone: true }).notNull().defaultNow(),
     error: text("error"),
-    createdAt: creado(),
-    updatedAt: actualizado(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
-  (t) => [index("jobs_pendientes_idx").on(t.estado, t.ejecutarDesde).where(sql`estado = 'pendiente'`)],
+  (t) => [index("jobs_pending_idx").on(t.status, t.runAt).where(sql`status = 'pending'`)],
 );

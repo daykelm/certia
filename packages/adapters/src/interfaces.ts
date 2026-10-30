@@ -3,49 +3,49 @@
  * The domain and the apps depend on these interfaces, never on a specific provider.
  */
 
-export interface Almacenamiento {
-  guardar(ruta: string, contenido: Buffer, tipoMime?: string): Promise<void>;
-  leer(ruta: string): Promise<Buffer>;
-  existe(ruta: string): Promise<boolean>;
-  borrar(ruta: string): Promise<void>;
+export interface Storage {
+  put(path: string, content: Buffer, mimeType?: string): Promise<void>;
+  get(path: string): Promise<Buffer>;
+  exists(path: string): Promise<boolean>;
+  delete(path: string): Promise<void>;
   /** Temporary download link (F-06, F-16). */
-  urlTemporal(ruta: string, segundos: number): Promise<string>;
+  temporaryUrl(path: string, seconds: number): Promise<string>;
 }
 
-export interface Cola {
-  encolar(tipo: string, payload: Record<string, unknown>, opciones?: { retrasoSegundos?: number }): Promise<void>;
+export interface Queue {
+  enqueue(type: string, payload: Record<string, unknown>, options?: { delaySeconds?: number }): Promise<void>;
 }
 
-export interface ConversorPdf {
+export interface PdfConverter {
   /** Converts images and office documents to PDF. */
-  aPdf(archivo: { nombre: string; contenido: Buffer }): Promise<Buffer>;
+  toPdf(file: { name: string; content: Buffer }): Promise<Buffer>;
   /** Merges several PDFs into one. */
-  unir(pdfs: Buffer[]): Promise<Buffer>;
+  merge(pdfs: Buffer[]): Promise<Buffer>;
 }
 
-export interface CampoExtraer {
+export interface ExtractionField {
   id: string;
-  etiqueta: string;
-  tipo: string;
-  opciones?: string[];
+  label: string;
+  type: string;
+  options?: string[];
 }
 
-export interface ResultadoExtraccion {
-  tipoDocumento?: string;
-  valores: Record<string, unknown>;
+export interface ExtractionResult {
+  documentType?: string;
+  values: Record<string, unknown>;
   /** Confidence 0–1 per field. */
-  confianza: Record<string, number>;
+  confidence: Record<string, number>;
 }
 
-export interface ExtractorIa {
-  extraer(entrada: {
-    documento: Buffer;
+export interface AiExtractor {
+  extract(input: {
+    document: Buffer;
     mime: string;
-    tiposPosibles: string[];
-    campos: CampoExtraer[];
-  }): Promise<ResultadoExtraccion>;
+    possibleTypes: string[];
+    fields: ExtractionField[];
+  }): Promise<ExtractionResult>;
 }
 
-export interface Correo {
-  enviar(mensaje: { para: string; asunto: string; texto: string; html?: string }): Promise<void>;
+export interface Mailer {
+  send(message: { to: string; subject: string; text: string; html?: string }): Promise<void>;
 }

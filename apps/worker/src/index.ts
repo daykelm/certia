@@ -1,48 +1,48 @@
-import { setTimeout as esperar } from "node:timers/promises";
-import { completarTrabajo, crearAdaptadores, fallarTrabajo, reservarTrabajo } from "@certia/adapters";
-import { crearDb } from "@certia/db";
-import { cargarCatalogo } from "@certia/fichas";
-import { manejadores, type ContextoTarea } from "./tareas.js";
+import { setTimeout as sleep } from "node:timers/promises";
+import { claimJob, completeJob, createAdapters, failJob } from "@certia/adapters";
+import { createDb } from "@certia/db";
+import { loadCatalog } from "@certia/fichas";
+import { handlers, type JobContext } from "./jobs.js";
 
-const ESPERA_SIN_TRABAJO_MS = 2000;
+const IDLE_WAIT_MS = 2000;
 
-const { db, pool } = crearDb();
-const ctx: ContextoTarea = { db, adaptadores: crearAdaptadores(db), catalogo: cargarCatalogo() };
+const { db, pool } = createDb();
+const ctx: JobContext = { db, adapters: createAdapters(db), catalog: loadCatalog() };
 
-let activo = true;
-const parar = () => {
+let running = true;
+const stop = () => {
   console.log("[worker] stopping…");
-  activo = false;
+  running = false;
 };
-process.on("SIGTERM", parar);
-process.on("SIGINT", parar);
+process.on("SIGTERM", stop);
+process.on("SIGINT", stop);
 
-console.log(`[worker] running. Registered jobs: ${Object.keys(manejadores).join(", ")}`);
+console.log(`[worker] running. Registered jobs: ${Object.keys(handlers).join(", ")}`);
 
-while (activo) {
-  let trabajo;
+while (running) {
+  let job;
   try {
-    trabajo = await reservarTrabajo(db);
+    job = await claimJob(db);
   } catch (e) {
     console.error("[worker] error reading the queue:", (e as Error).message);
-    await esperar(ESPERA_SIN_TRABAJO_MS * 5);
+    await sleep(IDLE_WAIT_MS * 5);
     continue;
   }
 
-  if (!trabajo) {
-    await esperar(ESPERA_SIN_TRABAJO_MS);
+  if (!job) {
+    await sleep(IDLE_WAIT_MS);
     continue;
   }
 
-  const manejador = manejadores[trabajo.tipo];
+  const handler = handlers[job.type];
   try {
-    if (!manejador) throw new Error(`No handler for "${trabajo.tipo}"`);
-    await manejador(trabajo.payload, ctx);
-    await completarTrabajo(db, trabajo.id);
+    if (!handler) throw new Error(`No handler for "${job.type}"`);
+    await handler(job.payload, ctx);
+    await completeJob(db, job.id);
   } catch (e) {
-    const mensaje = (e as Error).message;
-    console.error(`[worker] job ${trabajo.id} (${trabajo.tipo}) failed: ${mensaje}`);
-    await fallarTrabajo(db, trabajo, mensaje);
+    const message = (e as Error).message;
+    console.error(`[worker] job ${job.id} (${job.type}) failed: ${message}`);
+    await failJob(db, job, message);
   }
 }
 

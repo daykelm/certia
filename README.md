@@ -92,7 +92,7 @@ pnpm dev                                      # api + worker + web in dev mode
 ```
 
 - Web: http://localhost:5173
-- API: http://localhost:3000 (health: `/api/salud`)
+- API: http://localhost:3000 (health: `/api/health`)
 - Gotenberg: http://localhost:3001
 
 In development, documents are stored in `.storage/` and every request is identified as `DEV_USER_EMAIL` until Google sign-in is implemented (F-01).
@@ -133,6 +133,8 @@ docker compose -f docker/compose.yml --profile app up --build
 |---|---|
 | `DATABASE_URL` | Postgres connection string |
 | `APP_MODE` | `api`, `worker` or `migrate` (the same image runs in all three modes) |
+| `PUBLIC_URL` | Public base URL used in links sent to users (e.g. `https://app.certia-es.com`) |
+| `MAIL_FROM` | Sender for transactional email (`no-reply@certia-es.com`) |
 | `DEV_USER_EMAIL` | Development only: user every request is identified as |
 | `AUTH_GOOGLE_CLIENT_ID` / `AUTH_GOOGLE_CLIENT_SECRET` | Google OIDC credentials |
 | `AUTH_ALLOWED_DOMAIN` | Email domain allowed to sign in |
@@ -145,6 +147,24 @@ docker compose -f docker/compose.yml --profile app up --build
 | `ENCRYPTION_KEY_REF` | Production: reference to the key in Cloud KMS |
 
 Never commit `.env`.
+
+## Domains
+
+The project's domain is **certia-es.com**.
+
+| Host | Use |
+|---|---|
+| `certia-es.com` | Product website (reserved; redirects to the app for now) |
+| `app.certia-es.com` | Production app (API + frontend) |
+| `staging.certia-es.com` | Staging environment |
+| `no-reply@certia-es.com` | Sender of transactional email (beneficiary portal links, alerts) |
+
+Setup checklist:
+
+- [ ] DNS for the domain managed in Cloud DNS (or the current registrar).
+- [ ] `app` and `staging` pointing to Cloud Run through a global external Application Load Balancer with Google-managed certificates (Cloud Run domain mapping is not available in every region).
+- [ ] `PUBLIC_URL` set per environment.
+- [ ] SPF, DKIM and DMARC records for `certia-es.com` before sending email from it.
 
 ## Deployment
 
@@ -167,7 +187,7 @@ Google Cloud services:
 
 ## Conventions
 
-- **Language:** technical documentation, code comments, commit messages and logs are in English. Domain terms (see the glossary), ficha data and user-facing messages are in Spanish.
+- **Language:** code (identifiers, files, database tables and columns, API routes), technical documentation, comments, commit messages and logs are in English. Domain terms that have no good English equivalent stay in Spanish (`ficha`, `expediente`, `lote`; see the glossary), as do ficha data (field ids, labels, document types) and user-facing messages.
 - Branches: `main` (deployable), `feat/*`, `fix/*`.
 - Commits: [Conventional Commits](https://www.conventionalcommits.org/).
 - Every new feature references its ID from [FEATURE.md](./FEATURE.md) (e.g. `feat(lotes): F-10 automatic lote proposals`).

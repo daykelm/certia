@@ -1,52 +1,52 @@
 import { z } from "zod";
 
 /** User roles (F-01). A user can have several. */
-export const ROLES = ["admin", "direccion", "gestion", "verificacion", "lectura"] as const;
-export const RolSchema = z.enum(ROLES);
-export type Rol = z.infer<typeof RolSchema>;
+export const ROLES = ["admin", "director", "case_manager", "verifier", "viewer"] as const;
+export const RoleSchema = z.enum(ROLES);
+export type Role = z.infer<typeof RoleSchema>;
 
-/** Expediente (actuación) states. See PROJECT.md §6. */
-export const ESTADOS_EXPEDIENTE = [
+/** Expediente states. See PROJECT.md §6. */
+export const EXPEDIENTE_STATUSES = [
   "lead",
-  "pendiente_documentacion",
-  "pendiente_revision",
-  "incompleto",
-  "completo",
-  "en_lote",
-  "verificado",
-  "emitido",
-  "descartado",
+  "awaiting_documents",
+  "pending_review",
+  "incomplete",
+  "complete",
+  "in_lote",
+  "verified",
+  "issued",
+  "discarded",
 ] as const;
-export const EstadoExpedienteSchema = z.enum(ESTADOS_EXPEDIENTE);
-export type EstadoExpediente = z.infer<typeof EstadoExpedienteSchema>;
+export const ExpedienteStatusSchema = z.enum(EXPEDIENTE_STATUSES);
+export type ExpedienteStatus = z.infer<typeof ExpedienteStatusSchema>;
 
 /** Lote states. See PROJECT.md §6. */
-export const ESTADOS_LOTE = [
-  "borrador",
-  "preparado_verificacion",
-  "en_verificacion",
-  "subsanacion_verificacion",
-  "dictamen_favorable",
-  "preparado_emision",
-  "en_emision",
-  "subsanacion_emision",
-  "emitido",
+export const LOTE_STATUSES = [
+  "draft",
+  "ready_for_verification",
+  "in_verification",
+  "verification_corrections",
+  "favorable_opinion",
+  "ready_for_issuance",
+  "in_issuance",
+  "issuance_corrections",
+  "issued",
 ] as const;
-export const EstadoLoteSchema = z.enum(ESTADOS_LOTE);
-export type EstadoLote = z.infer<typeof EstadoLoteSchema>;
+export const LoteStatusSchema = z.enum(LOTE_STATUSES);
+export type LoteStatus = z.infer<typeof LoteStatusSchema>;
 
 /** State of each document in the checklist (F-08). */
-export const ESTADOS_DOCUMENTO = ["pendiente", "subido", "validado", "rechazado"] as const;
-export const EstadoDocumentoSchema = z.enum(ESTADOS_DOCUMENTO);
-export type EstadoDocumento = z.infer<typeof EstadoDocumentoSchema>;
+export const DOCUMENT_STATUSES = ["pending", "uploaded", "validated", "rejected"] as const;
+export const DocumentStatusSchema = z.enum(DOCUMENT_STATUSES);
+export type DocumentStatus = z.infer<typeof DocumentStatusSchema>;
 
 /** Origin of a task or subsanación (F-12). */
-export const ORIGENES_TAREA = ["interno", "prevision", "verificador", "gestor_autonomico"] as const;
-export const OrigenTareaSchema = z.enum(ORIGENES_TAREA);
-export type OrigenTarea = z.infer<typeof OrigenTareaSchema>;
+export const TASK_ORIGINS = ["internal", "preventive", "verifier", "regional_authority"] as const;
+export const TaskOriginSchema = z.enum(TASK_ORIGINS);
+export type TaskOrigin = z.infer<typeof TaskOriginSchema>;
 
-/** Spanish autonomous communities and cities (INE codes). */
-export const CCAA = [
+/** Spanish autonomous communities and cities (INE codes). Values are data, kept in Spanish. */
+export const REGIONS = [
   "01-andalucia",
   "02-aragon",
   "03-asturias",
@@ -67,33 +67,33 @@ export const CCAA = [
   "18-ceuta",
   "19-melilla",
 ] as const;
-export const CcaaSchema = z.enum(CCAA);
-export type Ccaa = z.infer<typeof CcaaSchema>;
+export const RegionSchema = z.enum(REGIONS);
+export type Region = z.infer<typeof RegionSchema>;
 
 // --- API DTOs ---
 
-export const CrearActuacionSchema = z.object({
-  fichaCodigo: z.string().min(1),
+export const CreateExpedienteSchema = z.object({
+  fichaCode: z.string().min(1),
   fichaVersion: z.number().int().positive(),
-  contacto: z.object({
-    nombre: z.string().min(1),
-    apellidos: z.string().optional(),
+  contact: z.object({
+    firstName: z.string().min(1),
+    lastName: z.string().optional(),
     email: z.string().email().optional(),
-    telefono: z.string().optional(),
+    phone: z.string().optional(),
   }),
-  comunidadAutonoma: CcaaSchema.optional(),
-  anio: z.number().int().min(2023).optional(),
-  datos: z.record(z.unknown()).default({}),
-  canal: z.string().optional(),
+  region: RegionSchema.optional(),
+  year: z.number().int().min(2023).optional(),
+  data: z.record(z.unknown()).default({}),
+  channel: z.string().optional(),
 });
-export type CrearActuacion = z.infer<typeof CrearActuacionSchema>;
+export type CreateExpediente = z.infer<typeof CreateExpedienteSchema>;
 
-export const TransicionSchema = z.object({
-  destino: EstadoExpedienteSchema,
-  comentario: z.string().optional(),
+export const TransitionSchema = z.object({
+  to: ExpedienteStatusSchema,
+  comment: z.string().optional(),
 });
-export type Transicion = z.infer<typeof TransicionSchema>;
+export type Transition = z.infer<typeof TransitionSchema>;
 
-export const CalcularSchema = z.object({
-  datos: z.record(z.unknown()),
+export const CalculateSchema = z.object({
+  data: z.record(z.unknown()),
 });

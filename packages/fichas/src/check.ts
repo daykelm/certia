@@ -2,24 +2,23 @@
  * Validates every ficha and runs its calculation test cases.
  * Used in CI: any failure blocks the deployment (F-03).
  */
-import { claveFicha, ejecutarPruebas } from "@certia/core";
-import { cargarCatalogo, directorioFichas } from "./index.js";
+import { fichaKey, runTests } from "@certia/core";
+import { fichasDir, loadCatalog } from "./index.js";
 
-let fallos = 0;
+let failures = 0;
 
 try {
-  const catalogo = cargarCatalogo();
-  console.log(`Fichas in ${directorioFichas()}: ${catalogo.todas().length}\n`);
+  const catalog = loadCatalog();
+  console.log(`Fichas in ${fichasDir()}: ${catalog.all().length}\n`);
 
-  for (const ficha of catalogo.todas()) {
-    console.log(`${claveFicha(ficha)} · ${ficha.nombre}`);
-    for (const p of ejecutarPruebas(ficha)) {
-      if (p.ok) {
-        console.log(`  ✓ ${p.descripcion} (${p.obtenido} kWh)`);
+  for (const ficha of catalog.all()) {
+    console.log(`${fichaKey(ficha)} · ${ficha.name}`);
+    for (const t of runTests(ficha)) {
+      if (t.ok) {
+        console.log(`  ✓ ${t.description} (${t.actual} kWh)`);
       } else {
-        fallos++;
-        const detalle = p.errores?.join("; ") ?? `expected ${p.esperado}, got ${p.obtenido}`;
-        console.log(`  ✗ ${p.descripcion}: ${detalle}`);
+        failures++;
+        console.log(`  ✗ ${t.description}: ${t.errors?.join("; ") ?? `expected ${t.expected}, got ${t.actual}`}`);
       }
     }
   }
@@ -28,8 +27,8 @@ try {
   process.exit(1);
 }
 
-if (fallos > 0) {
-  console.error(`\n${fallos} test(s) failed`);
+if (failures > 0) {
+  console.error(`\n${failures} test(s) failed`);
   process.exit(1);
 }
 console.log("\nAll fichas are valid.");

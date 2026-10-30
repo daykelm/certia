@@ -1,21 +1,18 @@
-import { crearAdaptadores } from "@certia/adapters";
-import { crearDb } from "@certia/db";
-import { cargarCatalogo } from "@certia/fichas";
-import { construirApp } from "./app.js";
+import { createAdapters } from "@certia/adapters";
+import { createDb } from "@certia/db";
+import { loadCatalog } from "@certia/fichas";
+import { buildApp } from "./app.js";
+import { config } from "./config.js";
 
-const { db, pool } = crearDb();
-const catalogo = cargarCatalogo();
-const app = await construirApp(
-  { db, catalogo, adaptadores: crearAdaptadores(db) },
-  { webDir: process.env.WEB_DIR },
-);
+const { db, pool } = createDb();
+const app = await buildApp({ db, config, catalog: loadCatalog(), adapters: createAdapters(db) });
 
-const cerrar = async () => {
+const shutdown = async () => {
   await app.close();
   await pool.end();
   process.exit(0);
 };
-process.on("SIGTERM", cerrar);
-process.on("SIGINT", cerrar);
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);
 
-await app.listen({ host: "0.0.0.0", port: Number(process.env.PORT ?? 3000) });
+await app.listen({ host: "0.0.0.0", port: config.port });

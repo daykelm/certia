@@ -3,57 +3,55 @@ import fastifyStatic from "@fastify/static";
 import Fastify from "fastify";
 import { sql } from "drizzle-orm";
 import { ZodError } from "zod";
-import { registrarAuth } from "./auth.js";
-import { ErrorHttp, type Servicios } from "./contexto.js";
-import { rutasActuaciones } from "./rutas/actuaciones.js";
-import { rutasFichas } from "./rutas/fichas.js";
-import { rutasPaneles } from "./rutas/paneles.js";
+import { registerAuth } from "./auth.js";
+import { HttpError, type Services } from "./context.js";
+import { dashboardRoutes } from "./routes/dashboards.js";
+import { expedienteRoutes } from "./routes/expedientes.js";
+import { fichaRoutes } from "./routes/fichas.js";
 
-export interface OpcionesApp {
-  /** Folder with the built frontend; if it exists, the API serves it. */
-  webDir?: string;
-}
-
-export async function construirApp(servicios: Servicios, opciones: OpcionesApp = {}) {
+export async function buildApp(services: Services) {
+  const { config } = services;
   const app = Fastify({
     logger: {
-      level: process.env.LOG_LEVEL ?? "info",
+      level: config.logLevel,
       // Never log sensitive data (F-16).
       redact: ["req.headers.authorization", "req.headers.cookie", "*.dni", "*.iban"],
     },
     bodyLimit: 1024 * 1024,
+    // Cloud Run terminates TLS in front of the container.
+    trustProxy: true,
   });
 
-  app.setErrorHandler((error, req, rep) => {
+  app.setErrorHandler((error, req, reply) => {
     if (error instanceof ZodError) {
-      return rep.code(400).send({
+      return reply.code(400).send({
         error: "Datos no válidos",
-        detalles: error.issues.map((i) => `${i.path.join(".")}: ${i.message}`),
+        details: error.issues.map((i) => `${i.path.join(".")}: ${i.message}`),
       });
     }
-    if (error instanceof ErrorHttp) {
-      return rep.code(error.status).send({ error: error.message, detalles: error.detalles });
+    if (error instanceof HttpError) {
+      return reply.code(error.status).send({ error: error.message, details: error.details });
     }
     req.log.error(error);
-    return rep.code(500).send({ error: "Error interno" });
+    return reply.code(500).send({ error: "Error interno" });
   });
 
-  app.get("/api/salud", async () => {
-    await servicios.db.execute(sql`select 1`);
-    return { ok: true, fichas: servicios.catalogo.todas().length };
+  app.get("/api/health", async () => {
+    await services.db.execute(sql`select 1`);
+    return { ok: true, fichas: services.catalog.all().length, publicUrl: config.publicUrl };
   });
 
-  registrarAuth(app, servicios);
-  await app.register((a) => rutasFichas(a, servicios), { prefix: "/api/fichas" });
-  await app.register((a) => rutasActuaciones(a, servicios), { prefix: "/api/actuaciones" });
-  await app.register((a) => rutasPaneles(a, servicios), { prefix: "/api/paneles" });
+  registerAuth(app, services);
+  await app.register((a) => fichaRoutes(a, services), { prefix: "/api/fichas" });
+  await app.register((a) => expedienteRoutes(a, services), { prefix: "/api/expedientes" });
+  await app.register((a) => dashboardRoutes(a, services), { prefix: "/api/dashboards" });
 
-  if (opciones.webDir && existsSync(opciones.webDir)) {
-    await app.register(fastifyStatic, { root: opciones.webDir });
+  if (config.webDir && existsSync(config.webDir)) {
+    await app.register(fastifyStatic, { root: config.webDir });
     // Frontend (SPA) routes: any non-API path returns index.html.
-    app.setNotFoundHandler((req, rep) => {
-      if (req.url.startsWith("/api/")) return rep.code(404).send({ error: "No encontrado" });
-      return rep.sendFile("index.html");
+    app.setNotFoundHandler((req, reply) => {
+      if (req.url.startsWith("/api/")) return reply.code(404).send({ error: "No encontrado" });
+      return reply.sendFile("index.html");
     });
   }
 

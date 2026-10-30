@@ -45,7 +45,8 @@ services:
       DATABASE_URL: postgres://certia:certia@postgres:5432/certia
       GOTENBERG_URL: http://gotenberg:3000
       STORAGE_LOCAL_DIR: /tmp/storage
-      DEV_USER_EMAIL: ${DEV_USER_EMAIL:-admin@example.com}
+      DEV_USER_EMAIL: ${DEV_USER_EMAIL:-admin@certia-es.com}
+      PUBLIC_URL: http://localhost:8080
     ports:
       - "8080:8080"
     depends_on:

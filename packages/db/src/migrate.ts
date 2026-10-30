@@ -1,4 +1,4 @@
-import { aplicarMigraciones } from "./index.js";
+import { runMigrations } from "./index.js";
 
-await aplicarMigraciones();
+await runMigrations();
 console.log("Migrations applied.");

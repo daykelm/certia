@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { and, eq } from "drizzle-orm";
-import { claveFicha, type Ficha } from "@certia/core";
+import { fichaKey, type Ficha } from "@certia/core";
 import type { Db } from "./index.js";
 import { fichaVersions } from "./schema.js";
 
@@ -13,32 +13,32 @@ function hashFicha(ficha: Ficha): string {
  * New versions are inserted; if an already published version has changed, it fails:
  * regulatory changes must create a new version (decision D3).
  */
-export async function sincronizarFichas(db: Db, fichas: Ficha[]) {
-  const resultado = { nuevas: [] as string[], sinCambios: [] as string[] };
+export async function syncFichas(db: Db, fichas: Ficha[]) {
+  const result = { added: [] as string[], unchanged: [] as string[] };
 
   for (const ficha of fichas) {
     const hash = hashFicha(ficha);
-    const [existente] = await db
+    const [existing] = await db
       .select({ hash: fichaVersions.hash })
       .from(fichaVersions)
-      .where(and(eq(fichaVersions.codigo, ficha.codigo), eq(fichaVersions.version, ficha.version)));
+      .where(and(eq(fichaVersions.code, ficha.code), eq(fichaVersions.version, ficha.version)));
 
-    if (!existente) {
+    if (!existing) {
       await db.insert(fichaVersions).values({
-        codigo: ficha.codigo,
+        code: ficha.code,
         version: ficha.version,
-        nombre: ficha.nombre,
+        name: ficha.name,
         hash,
-        definicion: ficha,
+        definition: ficha,
       });
-      resultado.nuevas.push(claveFicha(ficha));
-    } else if (existente.hash !== hash) {
+      result.added.push(fichaKey(ficha));
+    } else if (existing.hash !== hash) {
       throw new Error(
-        `Ficha ${claveFicha(ficha)} was already published and has changed. Create a new version instead of editing it.`,
+        `Ficha ${fichaKey(ficha)} was already published and has changed. Create a new version instead of editing it.`,
       );
     } else {
-      resultado.sinCambios.push(claveFicha(ficha));
+      result.unchanged.push(fichaKey(ficha));
     }
   }
-  return resultado;
+  return result;
 }
