@@ -16,12 +16,12 @@ export class ColaPostgres implements Cola {
   }
 }
 
-export interface Trabajo {
+export type Trabajo = {
   id: number;
   tipo: string;
   payload: Record<string, unknown>;
   intentos: number;
-}
+};
 
 /**
  * Reserva el siguiente trabajo pendiente. FOR UPDATE SKIP LOCKED permite

@@ -1,4 +1,4 @@
-import { all, create } from "mathjs";
+import { all, create, type FactoryFunctionMap } from "mathjs";
 import { z } from "zod";
 import { CcaaSchema } from "@certia/shared";
 import type { Campo, Ficha } from "./schema.js";
@@ -9,7 +9,7 @@ import type { Campo, Ficha } from "./schema.js";
  * Usa el parser de mathjs, que no ejecuta JavaScript, y además deshabilita
  * las funciones que permitirían alterar el propio evaluador desde una fórmula.
  */
-const math = create(all);
+const math = create(all as FactoryFunctionMap);
 const evaluar = math.evaluate.bind(math);
 math.import(
   {

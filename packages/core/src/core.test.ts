@@ -53,7 +53,7 @@ describe("fichas", () => {
 
   it("rechaza fichas sin pruebas o con campos duplicados", () => {
     expect(() => parsearFicha({ ...base, pruebas: [] })).toThrow();
-    expect(() => parsearFicha({ ...base, campos: [...base.campos, base.campos[0]] })).toThrow();
+    expect(() => parsearFicha({ ...base, campos: [...base.campos, base.campos[0]!] })).toThrow();
   });
 
   it("rechaza enum sin opciones", () => {

@@ -21,29 +21,39 @@ jobs:
           --health-interval 5s --health-timeout 3s --health-retries 10
     env:
       DATABASE_URL: postgres://certia:certia@localhost:5432/certia
+      DEV_USER_EMAIL: admin@example.com
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
       - name: Dependencias
         # Hasta que se suba pnpm-lock.yaml, se instala sin lockfile.
         run: |
           if [ -f pnpm-lock.yaml ]; then pnpm install --frozen-lockfile; else pnpm install; fi
-      - name: Lint y tipos
-        run: pnpm lint
+
+      # Los pasos de verificación se ejecutan todos aunque falle alguno,
+      # para ver todos los problemas en una sola ejecución.
+      - name: Lint
+        if: ${{ !cancelled() }}
+        run: .github/scripts/paso.sh Lint pnpm exec eslint .
+      - name: Tipos
+        if: ${{ !cancelled() }}
+        run: .github/scripts/paso.sh Tipos pnpm -r --no-bail typecheck
       - name: Fichas
-        run: pnpm fichas:check
+        if: ${{ !cancelled() }}
+        run: .github/scripts/paso.sh Fichas pnpm fichas:check
       - name: Tests
-        run: pnpm test
+        if: ${{ !cancelled() }}
+        run: .github/scripts/paso.sh Tests pnpm test
       - name: Migraciones y datos de ejemplo
+        if: ${{ !cancelled() }}
         # db:generate crea la migración inicial si aún no está en el repositorio.
-        run: pnpm db:generate && pnpm db:migrate && pnpm db:seed
-        env:
-          DEV_USER_EMAIL: admin@example.com
+        run: .github/scripts/paso.sh Migraciones bash -c "pnpm db:generate && pnpm db:migrate && pnpm db:seed"
       - name: Build
-        run: pnpm build
+        if: ${{ !cancelled() }}
+        run: .github/scripts/paso.sh Build pnpm build
 
   # TODO: despliegue a staging en Cloud Run (Artifact Registry + migraciones + deploy)
   # cuando exista el proyecto de Google Cloud. Ver README.md, sección "Despliegue".

@@ -1,5 +1,6 @@
 import { fileURLToPath } from "node:url";
-import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
+import { drizzle, type NodePgDatabase, type NodePgQueryResultHKT } from "drizzle-orm/node-postgres";
+import type { PgDatabase } from "drizzle-orm/pg-core";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import pg from "pg";
 import * as schema from "./schema.js";
@@ -10,7 +11,7 @@ export { sincronizarFichas } from "./sincronizar-fichas.js";
 
 export type Db = NodePgDatabase<typeof schema>;
 /** Base de datos o transacción: ambas sirven para escribir. */
-export type DbOTx = Db | Parameters<Parameters<Db["transaction"]>[0]>[0];
+export type DbOTx = PgDatabase<NodePgQueryResultHKT, typeof schema>;
 
 export function crearDb(url = process.env.DATABASE_URL) {
   if (!url) throw new Error("Falta DATABASE_URL");

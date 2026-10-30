@@ -27,9 +27,10 @@ try {
   }
   if (!admin) throw new Error("No se pudo crear el usuario");
 
+  const adminId = admin.id;
   await db
     .insert(userRoles)
-    .values(["admin", "direccion", "gestion", "verificacion"].map((rol) => ({ userId: admin.id, rol })))
+    .values(["admin", "direccion", "gestion", "verificacion"].map((rol) => ({ userId: adminId, rol })))
     .onConflictDoNothing();
 
   const r = await sincronizarFichas(db, cargarCatalogo().todas());
