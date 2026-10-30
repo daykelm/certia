@@ -1,0 +1,21 @@
+{
+  "name": "@certia/worker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --env-file-if-exists=../../.env src/index.ts",
+    "build": "tsup",
+    "start": "node dist/index.js",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@certia/adapters": "workspace:*",
+    "@certia/core": "workspace:*",
+    "@certia/db": "workspace:*",
+    "@certia/fichas": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.0"
+  }
+}

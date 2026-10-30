@@ -1,0 +1,67 @@
+# Supporting services for local development.
+# The API, worker and web run with `pnpm dev` outside Docker.
+# To try the full image: docker compose -f docker/compose.yml --profile app up --build
+
+name: certia
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: certia
+      POSTGRES_PASSWORD: certia
+      POSTGRES_DB: certia
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U certia"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    ports:
+      - "3001:3000"
+
+  # --- Production image, run locally ("app" profile) ---
+  migrate:
+    profiles: ["app"]
+    build: { context: .., dockerfile: docker/Dockerfile }
+    environment:
+      APP_MODE: migrate
+      DATABASE_URL: postgres://certia:certia@postgres:5432/certia
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  api:
+    profiles: ["app"]
+    build: { context: .., dockerfile: docker/Dockerfile }
+    environment:
+      APP_MODE: api
+      NODE_ENV: development
+      DATABASE_URL: postgres://certia:certia@postgres:5432/certia
+      GOTENBERG_URL: http://gotenberg:3000
+      STORAGE_LOCAL_DIR: /tmp/storage
+      DEV_USER_EMAIL: ${DEV_USER_EMAIL:-admin@certia-es.com}
+      PUBLIC_URL: http://localhost:8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+
+  worker:
+    profiles: ["app"]
+    build: { context: .., dockerfile: docker/Dockerfile }
+    environment:
+      APP_MODE: worker
+      DATABASE_URL: postgres://certia:certia@postgres:5432/certia
+      GOTENBERG_URL: http://gotenberg:3000
+      STORAGE_LOCAL_DIR: /tmp/storage
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+
+volumes:
+  postgres:
