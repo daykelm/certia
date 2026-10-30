@@ -91,8 +91,8 @@ pnpm db:seed                                  # organization, admin user and fic
 pnpm dev                                      # api + worker + web in dev mode
 ```
 
-- Web: http://localhost:5173
-- API: http://localhost:3000 (health: `/api/health`)
+- Web: http://localhost:5180
+- API: http://localhost:3100 (health: `/api/health`)
 - Gotenberg: http://localhost:3001
 
 In development, documents are stored in `.storage/` and every request is identified as `DEV_USER_EMAIL` until Google sign-in is implemented (F-01).
