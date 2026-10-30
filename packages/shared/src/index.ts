@@ -1,11 +1,11 @@
 import { z } from "zod";
 
-/** Roles de usuario (F-01). Un usuario puede tener varios. */
+/** User roles (F-01). A user can have several. */
 export const ROLES = ["admin", "direccion", "gestion", "verificacion", "lectura"] as const;
 export const RolSchema = z.enum(ROLES);
 export type Rol = z.infer<typeof RolSchema>;
 
-/** Estados del expediente (actuación). Ver PROJECT.md §6. */
+/** Expediente (actuación) states. See PROJECT.md §6. */
 export const ESTADOS_EXPEDIENTE = [
   "lead",
   "pendiente_documentacion",
@@ -20,7 +20,7 @@ export const ESTADOS_EXPEDIENTE = [
 export const EstadoExpedienteSchema = z.enum(ESTADOS_EXPEDIENTE);
 export type EstadoExpediente = z.infer<typeof EstadoExpedienteSchema>;
 
-/** Estados del lote. Ver PROJECT.md §6. */
+/** Lote states. See PROJECT.md §6. */
 export const ESTADOS_LOTE = [
   "borrador",
   "preparado_verificacion",
@@ -35,17 +35,17 @@ export const ESTADOS_LOTE = [
 export const EstadoLoteSchema = z.enum(ESTADOS_LOTE);
 export type EstadoLote = z.infer<typeof EstadoLoteSchema>;
 
-/** Estado de cada documento dentro de la checklist (F-08). */
+/** State of each document in the checklist (F-08). */
 export const ESTADOS_DOCUMENTO = ["pendiente", "subido", "validado", "rechazado"] as const;
 export const EstadoDocumentoSchema = z.enum(ESTADOS_DOCUMENTO);
 export type EstadoDocumento = z.infer<typeof EstadoDocumentoSchema>;
 
-/** Origen de una tarea o subsanación (F-12). */
+/** Origin of a task or subsanación (F-12). */
 export const ORIGENES_TAREA = ["interno", "prevision", "verificador", "gestor_autonomico"] as const;
 export const OrigenTareaSchema = z.enum(ORIGENES_TAREA);
 export type OrigenTarea = z.infer<typeof OrigenTareaSchema>;
 
-/** Comunidades y ciudades autónomas (códigos INE). */
+/** Spanish autonomous communities and cities (INE codes). */
 export const CCAA = [
   "01-andalucia",
   "02-aragon",
@@ -70,7 +70,7 @@ export const CCAA = [
 export const CcaaSchema = z.enum(CCAA);
 export type Ccaa = z.infer<typeof CcaaSchema>;
 
-// --- DTOs de la API ---
+// --- API DTOs ---
 
 export const CrearActuacionSchema = z.object({
   fichaCodigo: z.string().min(1),

@@ -4,10 +4,10 @@ import { CcaaSchema } from "@certia/shared";
 import type { Campo, Ficha } from "./schema.js";
 
 /**
- * Evaluador de expresiones seguro (F-03).
+ * Safe expression evaluator (F-03).
  *
- * Usa el parser de mathjs, que no ejecuta JavaScript, y además deshabilita
- * las funciones que permitirían alterar el propio evaluador desde una fórmula.
+ * Uses the mathjs parser, which never executes JavaScript, and additionally disables
+ * the functions that would let a formula tamper with the evaluator itself.
  */
 const math = create(all as FactoryFunctionMap);
 const evaluar = math.evaluate.bind(math);
@@ -32,11 +32,11 @@ function bloqueada(nombre: string) {
 }
 
 export function evaluarExpresion(expresion: string, ambito: Record<string, unknown>): unknown {
-  // mathjs puede modificar el ámbito (asignaciones); trabajamos sobre una copia.
+  // mathjs may mutate the scope (assignments), so we work on a copy.
   return evaluar(expresion, { ...ambito });
 }
 
-// --- Validación de datos según los campos de la ficha ---
+// --- Data validation against the ficha's fields ---
 
 function esquemaCampo(campo: Campo): z.ZodTypeAny {
   let esquema: z.ZodTypeAny;
@@ -93,7 +93,7 @@ export function validarDatos(ficha: Ficha, datos: Record<string, unknown>): Resu
   };
 }
 
-// --- Cálculo del ahorro ---
+// --- Savings calculation ---
 
 export type ResultadoCalculo =
   | { ok: true; kwh: number; datos: Record<string, unknown> }
@@ -120,7 +120,7 @@ export function calcularAhorro(ficha: Ficha, datos: Record<string, unknown>): Re
   return { ok: true, kwh: Math.round(valor * factor) / factor, datos: validacion.datos };
 }
 
-// --- Casos de prueba de la ficha ---
+// --- Ficha test cases ---
 
 export interface ResultadoPrueba {
   descripcion: string;
@@ -132,7 +132,7 @@ export interface ResultadoPrueba {
 
 export function ejecutarPruebas(ficha: Ficha): ResultadoPrueba[] {
   return ficha.pruebas.map((prueba, i) => {
-    const descripcion = prueba.descripcion ?? `Prueba ${i + 1}`;
+    const descripcion = prueba.descripcion ?? `Test ${i + 1}`;
     const r = calcularAhorro(ficha, prueba.entrada);
     if (!r.ok) {
       return { descripcion, ok: false, esperado: prueba.esperado_kwh, errores: r.errores };

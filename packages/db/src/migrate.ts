@@ -1,4 +1,4 @@
 import { aplicarMigraciones } from "./index.js";
 
 await aplicarMigraciones();
-console.log("Migraciones aplicadas.");
+console.log("Migrations applied.");

@@ -5,10 +5,10 @@ import { parse } from "yaml";
 import { claveFicha, FichaSchema, type Ficha } from "@certia/core";
 
 /**
- * Catálogo de fichas cargado desde los YAML de `definiciones/`.
+ * Ficha catalog loaded from the YAML files in `definiciones/`.
  *
- * En la imagen Docker las apps van empaquetadas, así que la ruta se indica
- * con FICHAS_DIR; en desarrollo se resuelve respecto a este archivo.
+ * In the Docker image the apps are bundled, so the path is set with FICHAS_DIR;
+ * in development it is resolved relative to this file.
  */
 export function directorioFichas(): string {
   return process.env.FICHAS_DIR ?? fileURLToPath(new URL("../definiciones", import.meta.url));
@@ -27,7 +27,7 @@ export class ErrorFicha extends Error {
     public readonly archivo: string,
     public readonly detalles: string[],
   ) {
-    super(`Ficha inválida en ${archivo}:\n  - ${detalles.join("\n  - ")}`);
+    super(`Invalid ficha in ${archivo}:\n  - ${detalles.join("\n  - ")}`);
   }
 }
 
@@ -35,7 +35,7 @@ export interface Catalogo {
   todas(): Ficha[];
   obtener(codigo: string, version: number): Ficha | undefined;
   versiones(codigo: string): Ficha[];
-  /** Versión vigente en una fecha (AAAA-MM-DD). */
+  /** Version in force on a date (YYYY-MM-DD). */
   vigente(codigo: string, fecha: string): Ficha | undefined;
 }
 
@@ -49,7 +49,7 @@ export function cargarCatalogo(dir = directorioFichas()): Catalogo {
       throw new ErrorFicha(nombre, r.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`));
     }
     const clave = claveFicha(r.data);
-    if (fichas.has(clave)) throw new ErrorFicha(nombre, [`${clave} está definida más de una vez`]);
+    if (fichas.has(clave)) throw new ErrorFicha(nombre, [`${clave} is defined more than once`]);
     fichas.set(clave, r.data);
   }
 

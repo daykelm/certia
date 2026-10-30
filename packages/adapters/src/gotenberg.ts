@@ -1,6 +1,6 @@
 import type { ConversorPdf } from "./interfaces.js";
 
-/** Conversión a PDF con Gotenberg (https://gotenberg.dev). */
+/** PDF conversion with Gotenberg (https://gotenberg.dev). */
 export class ConversorGotenberg implements ConversorPdf {
   constructor(private readonly url: string) {}
 
@@ -8,7 +8,7 @@ export class ConversorGotenberg implements ConversorPdf {
     const form = new FormData();
     for (const a of archivos) form.append("files", new Blob([new Uint8Array(a.contenido)]), a.nombre);
     const res = await fetch(`${this.url}${ruta}`, { method: "POST", body: form });
-    if (!res.ok) throw new Error(`Gotenberg respondió ${res.status}: ${await res.text()}`);
+    if (!res.ok) throw new Error(`Gotenberg answered ${res.status}: ${await res.text()}`);
     return Buffer.from(await res.arrayBuffer());
   }
 
@@ -16,9 +16,9 @@ export class ConversorGotenberg implements ConversorPdf {
     const extension = archivo.nombre.split(".").pop()?.toLowerCase() ?? "";
     if (extension === "pdf") return Promise.resolve(archivo.contenido);
     const esImagen = ["jpg", "jpeg", "png", "gif", "bmp", "tif", "tiff", "webp"].includes(extension);
-    // LibreOffice convierte tanto documentos ofimáticos como imágenes.
+    // LibreOffice converts both office documents and images.
     return this.enviar("/forms/libreoffice/convert", [archivo]).catch((e) => {
-      throw new Error(`No se pudo convertir ${esImagen ? "la imagen" : "el documento"} ${archivo.nombre}: ${e.message}`);
+      throw new Error(`Could not convert ${esImagen ? "image" : "document"} ${archivo.nombre}: ${e.message}`);
     });
   }
 

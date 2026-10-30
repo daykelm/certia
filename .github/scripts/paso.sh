@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Ejecuta un comando y, si falla, publica sus últimas líneas como anotación de error,
-# para poder leer el motivo desde la pestaña de checks o la API sin abrir el log completo.
-# Uso: .github/scripts/paso.sh "<nombre>" <comando...>
+# Runs a command and, if it fails, publishes its last lines as an error annotation,
+# so the cause can be read from the checks tab or the API without opening the full log.
+# Usage: .github/scripts/paso.sh "<name>" <command...>
 set -uo pipefail
 
 nombre="$1"
@@ -12,7 +12,7 @@ salida="$(mktemp)"
 codigo=${PIPESTATUS[0]}
 
 if [ "$codigo" -ne 0 ]; then
-  # Se quitan códigos de color y se codifican los saltos de línea para la anotación.
+  # Strip color codes and encode newlines for the annotation.
   mensaje="$(tail -n 60 "$salida" | sed 's/\x1b\[[0-9;]*m//g' | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')"
   echo "::error title=${nombre}::${mensaje}"
 fi

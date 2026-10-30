@@ -1,12 +1,12 @@
-# Una sola imagen para la API (que también sirve el frontend), el worker y las migraciones.
-# El modo se elige con APP_MODE=api | worker | migrate.
+# A single image for the API (which also serves the frontend), the worker and migrations.
+# The mode is selected with APP_MODE=api | worker | migrate.
 
 FROM node:22-slim AS base
 ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH
 RUN corepack enable
 WORKDIR /app
 
-# --- Dependencias y compilación ---
+# --- Dependencies and build ---
 FROM base AS build
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 COPY apps/api/package.json apps/api/
@@ -22,7 +22,7 @@ COPY . .
 RUN pnpm fichas:check && pnpm build
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile --offline
 
-# --- Imagen final ---
+# --- Runtime image ---
 FROM node:22-slim AS runtime
 ENV NODE_ENV=production \
     PORT=8080 \

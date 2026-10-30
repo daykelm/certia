@@ -6,9 +6,9 @@ import type { EstadoExpediente } from "@certia/shared";
 import { z } from "zod";
 import { ErrorHttp, requiereRol, usuarioDe, type Servicios } from "../contexto.js";
 
-/** Umbrales del semáforo en días (F-13). Configurables más adelante. */
+/** Traffic-light thresholds in days (F-13). To be made configurable. */
 const UMBRALES = { amarillo: 7, rojo: 14 };
-/** Estados finales o que dependen de terceros fuera de nuestro control directo. */
+/** Final states, excluded from the traffic light. */
 const ESTADOS_FINALES = ["emitido", "descartado"];
 
 function dias(desde: Date) {
@@ -22,7 +22,7 @@ function color(d: number) {
 export async function rutasPaneles(app: FastifyInstance, { db, catalogo }: Servicios) {
   app.addHook("preHandler", async (req) => void usuarioDe(req));
 
-  /** Lo que lleva más tiempo sin moverse, primero (F-13). */
+  /** Whatever has been idle the longest comes first (F-13). */
   app.get("/semaforo", async (req) => {
     const u = usuarioDe(req);
     const [exps, lts] = await Promise.all([
@@ -60,7 +60,7 @@ export async function rutasPaneles(app: FastifyInstance, { db, catalogo }: Servi
       .sort((a, b) => b.dias - a.dias);
   });
 
-  /** Propuesta automática de lotes para una ficha (F-10). */
+  /** Automatic lote proposals for a ficha (F-10). */
   app.get("/lotes/propuestas", { preHandler: requiereRol("verificacion", "direccion") }, async (req) => {
     const u = usuarioDe(req);
     const { ficha: codigo } = z.object({ ficha: z.string() }).parse(req.query);

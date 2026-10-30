@@ -1,6 +1,6 @@
 /**
- * Datos iniciales para desarrollo: organización, usuario administrador
- * y publicación de las fichas del catálogo.
+ * Development seed data: organization, admin user and publication
+ * of the catalog's fichas.
  */
 import { eq } from "drizzle-orm";
 import { cargarCatalogo } from "@certia/fichas";
@@ -16,16 +16,16 @@ try {
   let [org] = await db.select().from(organizations).where(eq(organizations.dominio, dominio));
   if (!org) {
     [org] = await db.insert(organizations).values({ nombre: "Organización de desarrollo", dominio }).returning();
-    console.log(`Organización creada: ${dominio}`);
+    console.log(`Organization created: ${dominio}`);
   }
-  if (!org) throw new Error("No se pudo crear la organización");
+  if (!org) throw new Error("Could not create the organization");
 
   let [admin] = await db.select().from(users).where(eq(users.email, email));
   if (!admin) {
     [admin] = await db.insert(users).values({ organizationId: org.id, email, nombre: "Administrador" }).returning();
-    console.log(`Usuario creado: ${email}`);
+    console.log(`User created: ${email}`);
   }
-  if (!admin) throw new Error("No se pudo crear el usuario");
+  if (!admin) throw new Error("Could not create the user");
 
   const adminId = admin.id;
   await db
@@ -34,7 +34,7 @@ try {
     .onConflictDoNothing();
 
   const r = await sincronizarFichas(db, cargarCatalogo().todas());
-  console.log(`Fichas publicadas: ${r.nuevas.join(", ") || "ninguna nueva"}`);
+  console.log(`Fichas published: ${r.nuevas.join(", ") || "none new"}`);
 } finally {
   await pool.end();
 }

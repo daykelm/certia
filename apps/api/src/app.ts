@@ -10,7 +10,7 @@ import { rutasFichas } from "./rutas/fichas.js";
 import { rutasPaneles } from "./rutas/paneles.js";
 
 export interface OpcionesApp {
-  /** Carpeta con el frontend compilado; si existe, la API lo sirve. */
+  /** Folder with the built frontend; if it exists, the API serves it. */
   webDir?: string;
 }
 
@@ -18,7 +18,7 @@ export async function construirApp(servicios: Servicios, opciones: OpcionesApp =
   const app = Fastify({
     logger: {
       level: process.env.LOG_LEVEL ?? "info",
-      // Nunca registrar datos sensibles (F-16).
+      // Never log sensitive data (F-16).
       redact: ["req.headers.authorization", "req.headers.cookie", "*.dni", "*.iban"],
     },
     bodyLimit: 1024 * 1024,
@@ -50,7 +50,7 @@ export async function construirApp(servicios: Servicios, opciones: OpcionesApp =
 
   if (opciones.webDir && existsSync(opciones.webDir)) {
     await app.register(fastifyStatic, { root: opciones.webDir });
-    // Rutas del frontend (SPA): cualquier ruta que no sea de la API devuelve index.html.
+    // Frontend (SPA) routes: any non-API path returns index.html.
     app.setNotFoundHandler((req, rep) => {
       if (req.url.startsWith("/api/")) return rep.code(404).send({ error: "No encontrado" });
       return rep.sendFile("index.html");

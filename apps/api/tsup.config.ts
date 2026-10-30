@@ -1,7 +1,7 @@
 import { defineConfig } from "tsup";
 
-// Empaqueta la app con los paquetes internos (@certia/*) incluidos.
-// Las dependencias de npm se resuelven desde node_modules en tiempo de ejecución.
+// Bundles the app together with the internal packages (@certia/*).
+// npm dependencies are resolved from node_modules at runtime.
 export default defineConfig({
   entry: ["src/index.ts", "src/migrate.ts"],
   format: ["esm"],

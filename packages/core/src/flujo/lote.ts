@@ -1,7 +1,7 @@
 import type { EstadoLote } from "@certia/shared";
 
 /**
- * Máquina de estados del lote (PROJECT.md §6).
+ * Lote state machine (PROJECT.md §6).
  */
 
 export const TRANSICIONES_LOTE: Record<EstadoLote, readonly EstadoLote[]> = {
@@ -16,7 +16,7 @@ export const TRANSICIONES_LOTE: Record<EstadoLote, readonly EstadoLote[]> = {
   emitido: [],
 };
 
-/** Mientras el lote está en estos estados se pueden añadir o retirar expedientes. */
+/** Expedientes can be added or removed while the lote is in these states. */
 export const LOTE_EDITABLE: ReadonlySet<EstadoLote> = new Set(["borrador", "preparado_verificacion"]);
 
 export interface ContextoLote {

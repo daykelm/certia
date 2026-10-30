@@ -46,48 +46,48 @@ const v2 = parsearFicha({
 });
 
 describe("fichas", () => {
-  it("aplica valores por defecto", () => {
+  it("applies defaults", () => {
     expect(v1.empaquetado.tamano_max_mb).toBe(10);
     expect(v1.campos[0]?.obligatorio).toBe(true);
   });
 
-  it("rechaza fichas sin pruebas o con campos duplicados", () => {
+  it("rejects fichas without tests or with duplicate fields", () => {
     expect(() => parsearFicha({ ...base, pruebas: [] })).toThrow();
     expect(() => parsearFicha({ ...base, campos: [...base.campos, base.campos[0]!] })).toThrow();
   });
 
-  it("rechaza enum sin opciones", () => {
+  it("rejects enums without options", () => {
     expect(() =>
       parsearFicha({ ...base, campos: [{ id: "x", etiqueta: "X", tipo: "enum" }] }),
     ).toThrow();
   });
 });
 
-describe("cálculo", () => {
-  it("calcula con tablas de constantes", () => {
+describe("calculation", () => {
+  it("calculates with constant lookup tables", () => {
     const r = calcularAhorro(v1, { tipo_vehiculo: "N1", achatarramiento: false, comunidad_autonoma: "13-madrid" });
     expect(r).toMatchObject({ ok: true, kwh: 9000 });
   });
 
-  it("valida los datos antes de calcular", () => {
+  it("validates data before calculating", () => {
     const r = calcularAhorro(v1, { tipo_vehiculo: "X", comunidad_autonoma: "13-madrid" });
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.errores.length).toBeGreaterThanOrEqual(2);
   });
 
-  it("las pruebas de la ficha pasan", () => {
+  it("ficha test cases pass", () => {
     expect(ejecutarPruebas(v1).every((p) => p.ok)).toBe(true);
     expect(ejecutarPruebas(v2).every((p) => p.ok)).toBe(true);
   });
 
-  it("bloquea funciones peligrosas en fórmulas", () => {
+  it("blocks dangerous functions in formulas", () => {
     expect(() => evaluarExpresion('import({}, {})', {})).toThrow();
     expect(() => evaluarExpresion('evaluate("1+1")', {})).toThrow();
   });
 });
 
-describe("comparador", () => {
-  it("elige la versión con más ahorro y muestra documentos exclusivos", () => {
+describe("version comparator", () => {
+  it("picks the version with the highest savings and lists exclusive documents", () => {
     const c = compararVersiones([v1, v2], { tipo_vehiculo: "M1", achatarramiento: true, comunidad_autonoma: "13-madrid" });
     expect(c.mejor).toEqual({ codigo: "TEST-VE", version: 2, kwh: 7200 });
     expect(c.versiones[1]?.documentosExclusivos).toEqual(["certificado_eficiencia"]);
@@ -95,14 +95,14 @@ describe("comparador", () => {
 });
 
 describe("checklist", () => {
-  it("aplica documentos condicionales", () => {
+  it("applies conditional documents", () => {
     const sin = generarChecklist(v1, { achatarramiento: false }, []);
     expect(sin.faltan).toEqual(["ficha_tecnica", "acuerdo_cesion"]);
     const con = generarChecklist(v1, { achatarramiento: true }, [{ tipo: "ficha_tecnica", estado: "validado" }]);
     expect(con.faltan).toEqual(["baja_vehiculo", "acuerdo_cesion"]);
   });
 
-  it("está completa cuando todo lo obligatorio está validado", () => {
+  it("is complete when every mandatory document is validated", () => {
     const c = generarChecklist(v1, { achatarramiento: false }, [
       { tipo: "ficha_tecnica", estado: "rechazado" },
       { tipo: "ficha_tecnica", estado: "validado" },
@@ -112,31 +112,31 @@ describe("checklist", () => {
   });
 });
 
-describe("flujo del expediente", () => {
+describe("expediente workflow", () => {
   const ctx = { checklistCompleta: true, ahorroCalculado: true, origen: "usuario" as const };
 
-  it("permite transiciones válidas", () => {
+  it("allows valid transitions", () => {
     expect(puedeTransicionar("pendiente_revision", "completo", ctx).ok).toBe(true);
   });
 
-  it("explica por qué no se puede completar", () => {
+  it("explains why it cannot be completed", () => {
     const r = puedeTransicionar("pendiente_revision", "completo", { ...ctx, checklistCompleta: false });
     expect(r.ok).toBe(false);
     expect(r.motivos).toContain("Faltan documentos obligatorios por validar");
   });
 
-  it("los estados de lote no se cambian a mano", () => {
+  it("lote-driven states cannot be changed by hand", () => {
     expect(puedeTransicionar("completo", "en_lote", ctx).ok).toBe(false);
     expect(puedeTransicionar("completo", "en_lote", { ...ctx, origen: "lote" }).ok).toBe(true);
   });
 
-  it("rechaza saltos no definidos", () => {
+  it("rejects undefined transitions", () => {
     expect(puedeTransicionar("lead", "emitido", ctx).ok).toBe(false);
   });
 });
 
-describe("flujo del lote", () => {
-  it("no se prepara sin alcanzar el mínimo", () => {
+describe("lote workflow", () => {
+  it("cannot be prepared below the minimum", () => {
     const r = puedeTransicionarLote("borrador", "preparado_verificacion", {
       alcanzaMinimo: false,
       numActuaciones: 3,
@@ -146,8 +146,8 @@ describe("flujo del lote", () => {
   });
 });
 
-describe("propuesta de lotes", () => {
-  it("agrupa por claves y calcula lo que falta", () => {
+describe("lote proposals", () => {
+  it("groups by keys and computes what is missing", () => {
     const actuacion = (id: string, estado: "completo" | "incompleto", ccaa: string, kwh = 6000) => ({
       id,
       estado,
@@ -167,14 +167,14 @@ describe("propuesta de lotes", () => {
   });
 });
 
-describe("nombres de archivo", () => {
-  it("normaliza acentos y caracteres prohibidos", () => {
+describe("file names", () => {
+  it("normalizes accents and forbidden characters", () => {
     expect(generarNombre("{referencia}_{tipo}", { referencia: "AND 2025.03", tipo: "Ficha técnica" }, v1.empaquetado)).toBe(
       "AND_2025_03_Ficha_tecnica",
     );
   });
 
-  it("detecta nombres y tamaños inválidos", () => {
+  it("detects invalid names and sizes", () => {
     const errores = validarArchivo({ nombre: "mal nombre.v2", extension: "pdf", bytes: 12 * 1024 * 1024 }, v1.empaquetado);
     expect(errores).toHaveLength(3);
   });

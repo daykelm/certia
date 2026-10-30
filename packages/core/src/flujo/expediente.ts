@@ -1,7 +1,7 @@
 import type { EstadoExpediente } from "@certia/shared";
 
 /**
- * Máquina de estados del expediente (PROJECT.md §6).
+ * Expediente state machine (PROJECT.md §6).
  */
 
 export const TRANSICIONES_EXPEDIENTE: Record<EstadoExpediente, readonly EstadoExpediente[]> = {
@@ -16,13 +16,13 @@ export const TRANSICIONES_EXPEDIENTE: Record<EstadoExpediente, readonly EstadoEx
   descartado: ["lead"],
 };
 
-/** Estados que solo cambian como consecuencia del flujo del lote, nunca a mano. */
+/** States that only change through the lote workflow, never by hand. */
 const GESTIONADOS_POR_LOTE: ReadonlySet<EstadoExpediente> = new Set(["en_lote", "verificado", "emitido"]);
 
 export interface ContextoExpediente {
   checklistCompleta: boolean;
   ahorroCalculado: boolean;
-  /** Quién provoca el cambio: un usuario o el flujo del lote. */
+  /** Who triggers the change: a user or the lote workflow. */
   origen: "usuario" | "lote";
 }
 

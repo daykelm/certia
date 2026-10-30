@@ -1,6 +1,6 @@
 /**
- * Puertos de infraestructura (decisión D6).
- * El dominio y las apps dependen de estas interfaces, nunca de un proveedor concreto.
+ * Infrastructure ports (decision D6).
+ * The domain and the apps depend on these interfaces, never on a specific provider.
  */
 
 export interface Almacenamiento {
@@ -8,7 +8,7 @@ export interface Almacenamiento {
   leer(ruta: string): Promise<Buffer>;
   existe(ruta: string): Promise<boolean>;
   borrar(ruta: string): Promise<void>;
-  /** Enlace temporal de descarga (F-06, F-16). */
+  /** Temporary download link (F-06, F-16). */
   urlTemporal(ruta: string, segundos: number): Promise<string>;
 }
 
@@ -17,9 +17,9 @@ export interface Cola {
 }
 
 export interface ConversorPdf {
-  /** Convierte imágenes y documentos ofimáticos a PDF. */
+  /** Converts images and office documents to PDF. */
   aPdf(archivo: { nombre: string; contenido: Buffer }): Promise<Buffer>;
-  /** Une varios PDF en uno. */
+  /** Merges several PDFs into one. */
   unir(pdfs: Buffer[]): Promise<Buffer>;
 }
 
@@ -33,7 +33,7 @@ export interface CampoExtraer {
 export interface ResultadoExtraccion {
   tipoDocumento?: string;
   valores: Record<string, unknown>;
-  /** Confianza 0–1 por campo. */
+  /** Confidence 0–1 per field. */
   confianza: Record<string, number>;
 }
 

@@ -2,21 +2,21 @@ import { calcularAhorro, type ResultadoCalculo } from "./calculo.js";
 import type { Ficha } from "./schema.js";
 
 /**
- * Comparador de versiones de ficha (F-07).
- * Calcula el ahorro de los mismos datos con cada versión y señala la más favorable.
+ * Ficha version comparator (F-07).
+ * Calculates the savings for the same data with every version and flags the most favorable one.
  */
 
 export interface ComparacionVersion {
   codigo: string;
   version: number;
   resultado: ResultadoCalculo;
-  /** Documentos que exige esta versión y no exigen las demás. */
+  /** Documents required by this version and by no other. */
   documentosExclusivos: string[];
 }
 
 export interface Comparacion {
   versiones: ComparacionVersion[];
-  /** Versión con mayor ahorro entre las que se pueden calcular. */
+  /** Version with the highest savings among those that can be calculated. */
   mejor?: { codigo: string; version: number; kwh: number };
 }
 

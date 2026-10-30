@@ -2,28 +2,28 @@ import type { EstadoExpediente } from "@certia/shared";
 import type { Agrupacion } from "../ficha/schema.js";
 
 /**
- * Propuesta automática de lotes (F-10).
- * Agrupa expedientes por las claves de la ficha (p. ej. comunidad autónoma y año)
- * y compara el ahorro acumulado con el mínimo exigido.
+ * Automatic lote proposals (F-10).
+ * Groups expedientes by the ficha's keys (e.g. autonomous community and year)
+ * and compares the accumulated savings with the required minimum.
  */
 
 export interface ActuacionAgrupable {
   id: string;
   estado: EstadoExpediente;
   ahorroKwh: number;
-  /** Valores disponibles para las claves: columnas del expediente y campos de la ficha. */
+  /** Values available for the keys: expediente columns and ficha fields. */
   valores: Record<string, unknown>;
 }
 
 export interface PropuestaLote {
   clave: Record<string, string>;
   etiqueta: string;
-  /** Expedientes completos que pueden entrar ya en el lote. */
+  /** Complete expedientes that can join the lote right away. */
   completas: string[];
   totalKwh: number;
   alcanzaMinimo: boolean;
   faltanKwh: number;
-  /** Expedientes casi completos que sumarían si se completan. */
+  /** Almost-complete expedientes that would count once completed. */
   candidatas: string[];
   totalPotencialKwh: number;
 }
@@ -44,7 +44,7 @@ export function proponerLotes(actuaciones: ActuacionAgrupable[], regla: Agrupaci
       if (v === undefined || v === null || v === "") incompleta = true;
       clave[k] = String(v ?? "");
     }
-    if (incompleta) continue; // sin valor en alguna clave no se puede agrupar
+    if (incompleta) continue; // cannot be grouped without a value for every key
 
     const etiqueta = regla.claves.map((k) => clave[k]).join(" · ") || "todas";
     let grupo = grupos.get(etiqueta);
@@ -76,7 +76,7 @@ export function proponerLotes(actuaciones: ActuacionAgrupable[], regla: Agrupaci
     p.alcanzaMinimo = p.completas.length > 0 && p.totalKwh >= regla.minimo_kwh;
     p.faltanKwh = Math.max(0, regla.minimo_kwh - p.totalKwh);
   }
-  // Primero los que ya pueden enviarse; después, los más cercanos al mínimo.
+  // Ready-to-send groups first, then the ones closest to the minimum.
   return propuestas.sort(
     (a, b) => Number(b.alcanzaMinimo) - Number(a.alcanzaMinimo) || b.totalKwh - a.totalKwh,
   );

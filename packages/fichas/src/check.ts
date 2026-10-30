@@ -1,6 +1,6 @@
 /**
- * Valida todas las fichas y ejecuta sus casos de prueba de cálculo.
- * Se usa en CI: si algo falla, el despliegue se detiene (F-03).
+ * Validates every ficha and runs its calculation test cases.
+ * Used in CI: any failure blocks the deployment (F-03).
  */
 import { claveFicha, ejecutarPruebas } from "@certia/core";
 import { cargarCatalogo, directorioFichas } from "./index.js";
@@ -9,7 +9,7 @@ let fallos = 0;
 
 try {
   const catalogo = cargarCatalogo();
-  console.log(`Fichas en ${directorioFichas()}: ${catalogo.todas().length}\n`);
+  console.log(`Fichas in ${directorioFichas()}: ${catalogo.todas().length}\n`);
 
   for (const ficha of catalogo.todas()) {
     console.log(`${claveFicha(ficha)} · ${ficha.nombre}`);
@@ -18,7 +18,7 @@ try {
         console.log(`  ✓ ${p.descripcion} (${p.obtenido} kWh)`);
       } else {
         fallos++;
-        const detalle = p.errores?.join("; ") ?? `esperado ${p.esperado}, obtenido ${p.obtenido}`;
+        const detalle = p.errores?.join("; ") ?? `expected ${p.esperado}, got ${p.obtenido}`;
         console.log(`  ✗ ${p.descripcion}: ${detalle}`);
       }
     }
@@ -29,7 +29,7 @@ try {
 }
 
 if (fallos > 0) {
-  console.error(`\n${fallos} prueba(s) fallida(s)`);
+  console.error(`\n${fallos} test(s) failed`);
   process.exit(1);
 }
-console.log("\nTodas las fichas son válidas.");
+console.log("\nAll fichas are valid.");

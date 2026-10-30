@@ -3,7 +3,7 @@ import { evaluarExpresion } from "../ficha/calculo.js";
 import type { Ficha } from "../ficha/schema.js";
 
 /**
- * Checklist documental de un expediente (F-08), derivada de la ficha.
+ * Document checklist of an expediente (F-08), derived from the ficha.
  */
 
 export interface DocumentoExpediente {
@@ -16,14 +16,14 @@ export interface ItemChecklist {
   etiqueta: string;
   obligatorio: boolean;
   generado: boolean;
-  /** false si la condición del documento no se cumple para estos datos. */
+  /** false when the document's condition does not hold for this data. */
   aplica: boolean;
   estado: EstadoDocumento;
 }
 
 export interface Checklist {
   items: ItemChecklist[];
-  /** Todos los documentos obligatorios que aplican están validados. */
+  /** Every applicable mandatory document is validated. */
   completa: boolean;
   faltan: string[];
   errores: string[];
@@ -43,7 +43,7 @@ export function generarChecklist(
 ): Checklist {
   const errores: string[] = [];
 
-  // Si hay varios documentos del mismo tipo, cuenta el de mejor estado.
+  // With several documents of the same type, the best state wins.
   const estadoPorTipo = new Map<string, EstadoDocumento>();
   for (const doc of documentos) {
     const actual = estadoPorTipo.get(doc.tipo);
@@ -58,7 +58,7 @@ export function generarChecklist(
       try {
         aplica = Boolean(evaluarExpresion(req.condicion, { ...ficha.constantes, ...datos }));
       } catch (e) {
-        // Sin datos suficientes para evaluar la condición: se pide el documento por prudencia.
+        // Not enough data to evaluate the condition: request the document to be safe.
         errores.push(`No se pudo evaluar la condición de "${req.tipo}": ${(e as Error).message}`);
       }
     }

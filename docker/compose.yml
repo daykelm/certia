@@ -1,6 +1,6 @@
-# Servicios de apoyo para desarrollo local.
-# La API, el worker y la web se ejecutan con `pnpm dev` fuera de Docker.
-# Para probar la imagen completa: docker compose -f docker/compose.yml --profile app up --build
+# Supporting services for local development.
+# The API, worker and web run with `pnpm dev` outside Docker.
+# To try the full image: docker compose -f docker/compose.yml --profile app up --build
 
 name: certia
 
@@ -26,7 +26,7 @@ services:
     ports:
       - "3001:3000"
 
-  # --- Imagen de producción en local (perfil "app") ---
+  # --- Production image, run locally ("app" profile) ---
   migrate:
     profiles: ["app"]
     build: { context: .., dockerfile: docker/Dockerfile }

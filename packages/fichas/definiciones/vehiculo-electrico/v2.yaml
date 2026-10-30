@@ -1,6 +1,6 @@
-# ⚠️ PLANTILLA DE EJEMPLO — valores ilustrativos.
-# Sustituir código, factores, fórmula y documentos por los de la ficha oficial.
-# Ilustra una nueva versión que añade parámetros (achatarramiento) y un documento condicional.
+# ⚠️ SAMPLE TEMPLATE — illustrative values.
+# Replace code, factors, formula and documents with those of the official ficha.
+# Illustrates a new version adding parameters (scrappage) and a conditional document.
 codigo: TRA-VE
 version: 2
 nombre: Vehículo eléctrico (versión vigente)

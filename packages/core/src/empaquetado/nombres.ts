@@ -1,10 +1,10 @@
 import type { Empaquetado } from "../ficha/schema.js";
 
 /**
- * Nombres y tamaños de archivo para los paquetes de verificación y emisión (F-06, F-11).
+ * File names and sizes for the verification and issuance packages (F-06, F-11).
  */
 
-/** Convierte un texto libre en un nombre de archivo seguro (sin acentos, espacios ni caracteres prohibidos). */
+/** Turns free text into a safe file name (no accents, spaces or forbidden characters). */
 export function normalizarNombre(texto: string, reglas: Pick<Empaquetado, "caracteres_prohibidos">): string {
   const prohibidos = new Set(reglas.caracteres_prohibidos);
   const sinAcentos = texto.normalize("NFD").replace(/\p{Diacritic}/gu, "");
@@ -15,7 +15,7 @@ export function normalizarNombre(texto: string, reglas: Pick<Empaquetado, "carac
   return resultado.replace(/_+/g, "_").replace(/^_|_$/g, "");
 }
 
-/** Rellena un patrón como "{referencia}_{tipo}" y lo normaliza. */
+/** Fills a pattern such as "{referencia}_{tipo}" and normalizes it. */
 export function generarNombre(
   patron: string,
   variables: Record<string, string | number>,
@@ -30,13 +30,13 @@ export function generarNombre(
 }
 
 export interface ArchivoPaquete {
-  /** Nombre sin extensión. */
+  /** Name without extension. */
   nombre: string;
   extension: string;
   bytes: number;
 }
 
-/** Devuelve la lista de errores de un archivo; vacía si es válido. */
+/** Returns the file's list of errors; empty when valid. */
 export function validarArchivo(archivo: ArchivoPaquete, reglas: Empaquetado): string[] {
   const errores: string[] = [];
   const completo = `${archivo.nombre}.${archivo.extension}`;

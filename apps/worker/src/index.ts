@@ -11,20 +11,20 @@ const ctx: ContextoTarea = { db, adaptadores: crearAdaptadores(db), catalogo: ca
 
 let activo = true;
 const parar = () => {
-  console.log("[worker] parando…");
+  console.log("[worker] stopping…");
   activo = false;
 };
 process.on("SIGTERM", parar);
 process.on("SIGINT", parar);
 
-console.log(`[worker] en marcha. Tareas registradas: ${Object.keys(manejadores).join(", ")}`);
+console.log(`[worker] running. Registered jobs: ${Object.keys(manejadores).join(", ")}`);
 
 while (activo) {
   let trabajo;
   try {
     trabajo = await reservarTrabajo(db);
   } catch (e) {
-    console.error("[worker] error al leer la cola:", (e as Error).message);
+    console.error("[worker] error reading the queue:", (e as Error).message);
     await esperar(ESPERA_SIN_TRABAJO_MS * 5);
     continue;
   }
@@ -36,12 +36,12 @@ while (activo) {
 
   const manejador = manejadores[trabajo.tipo];
   try {
-    if (!manejador) throw new Error(`No hay manejador para "${trabajo.tipo}"`);
+    if (!manejador) throw new Error(`No handler for "${trabajo.tipo}"`);
     await manejador(trabajo.payload, ctx);
     await completarTrabajo(db, trabajo.id);
   } catch (e) {
     const mensaje = (e as Error).message;
-    console.error(`[worker] trabajo ${trabajo.id} (${trabajo.tipo}) falló: ${mensaje}`);
+    console.error(`[worker] job ${trabajo.id} (${trabajo.tipo}) failed: ${mensaje}`);
     await fallarTrabajo(db, trabajo, mensaje);
   }
 }

@@ -1,10 +1,10 @@
 import { createCipheriv, createDecipheriv, createHmac, randomBytes } from "node:crypto";
 
 /**
- * Cifrado de datos sensibles a nivel de aplicación (F-16).
+ * Application-level encryption of sensitive data (F-16).
  *
- * AES-256-GCM con IV aleatorio. El formato guardado es `v1:<iv>:<tag>:<datos>` en base64.
- * En producción la clave procederá de Cloud KMS (cifrado de sobre); la interfaz no cambia.
+ * AES-256-GCM with a random IV. Stored format: `v1:<iv>:<tag>:<data>`, base64-encoded.
+ * In production the key will come from Cloud KMS (envelope encryption); the interface stays the same.
  */
 export class Cifrador {
   private readonly clave: Buffer;
@@ -12,15 +12,15 @@ export class Cifrador {
 
   constructor(claveBase64: string) {
     const clave = Buffer.from(claveBase64, "base64");
-    if (clave.length !== 32) throw new Error("La clave de cifrado debe tener 32 bytes (base64)");
+    if (clave.length !== 32) throw new Error("The encryption key must be 32 bytes (base64)");
     this.clave = clave;
-    // Clave derivada distinta para los hashes de búsqueda.
+    // Separate derived key for search hashes.
     this.claveHash = createHmac("sha256", clave).update("certia:busqueda").digest();
   }
 
   static desdeEntorno(): Cifrador {
     const clave = process.env.ENCRYPTION_KEY;
-    if (!clave) throw new Error("Falta ENCRYPTION_KEY");
+    if (!clave) throw new Error("ENCRYPTION_KEY is not set");
     return new Cifrador(clave);
   }
 
@@ -34,13 +34,13 @@ export class Cifrador {
 
   descifrar(valor: string): string {
     const [version, iv, tag, datos] = valor.split(":");
-    if (version !== "v1" || !iv || !tag || !datos) throw new Error("Formato de dato cifrado no válido");
+    if (version !== "v1" || !iv || !tag || !datos) throw new Error("Invalid encrypted value format");
     const decipher = createDecipheriv("aes-256-gcm", this.clave, Buffer.from(iv, "base64"));
     decipher.setAuthTag(Buffer.from(tag, "base64"));
     return Buffer.concat([decipher.update(Buffer.from(datos, "base64")), decipher.final()]).toString("utf8");
   }
 
-  /** Hash determinista para buscar (p. ej. por DNI) sin guardar el valor en claro. */
+  /** Deterministic hash to search (e.g. by DNI) without storing the plain value. */
   hashBusqueda(texto: string): string {
     const normalizado = texto.replace(/[\s-]/g, "").toUpperCase();
     return createHmac("sha256", this.claveHash).update(normalizado).digest("hex");

@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  verificar:
+  verify:
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -28,32 +28,34 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-      - name: Dependencias
-        # Hasta que se suba pnpm-lock.yaml, se instala sin lockfile.
+          # Caching needs pnpm-lock.yaml; enable it once the lockfile is committed.
+          package-manager-cache: false
+      - name: Dependencies
+        # Until pnpm-lock.yaml is committed, install without a lockfile.
         run: |
           if [ -f pnpm-lock.yaml ]; then pnpm install --frozen-lockfile; else pnpm install; fi
 
-      # Los pasos de verificación se ejecutan todos aunque falle alguno,
-      # para ver todos los problemas en una sola ejecución.
+      # Every check runs even if a previous one fails,
+      # so a single run reports all problems.
       - name: Lint
         if: ${{ !cancelled() }}
         run: .github/scripts/paso.sh Lint pnpm exec eslint .
-      - name: Tipos
+      - name: Types
         if: ${{ !cancelled() }}
-        run: .github/scripts/paso.sh Tipos pnpm -r --no-bail typecheck
+        run: .github/scripts/paso.sh Types pnpm -r --no-bail typecheck
       - name: Fichas
         if: ${{ !cancelled() }}
         run: .github/scripts/paso.sh Fichas pnpm fichas:check
       - name: Tests
         if: ${{ !cancelled() }}
         run: .github/scripts/paso.sh Tests pnpm test
-      - name: Migraciones y datos de ejemplo
+      - name: Migrations and seed data
         if: ${{ !cancelled() }}
-        # db:generate crea la migración inicial si aún no está en el repositorio.
-        run: .github/scripts/paso.sh Migraciones bash -c "pnpm db:generate && pnpm db:migrate && pnpm db:seed"
+        # db:generate creates the initial migration if it is not in the repo yet.
+        run: .github/scripts/paso.sh Migrations bash -c "pnpm db:generate && pnpm db:migrate && pnpm db:seed"
       - name: Build
         if: ${{ !cancelled() }}
         run: .github/scripts/paso.sh Build pnpm build
 
-  # TODO: despliegue a staging en Cloud Run (Artifact Registry + migraciones + deploy)
-  # cuando exista el proyecto de Google Cloud. Ver README.md, sección "Despliegue".
+  # TODO: deploy to staging on Cloud Run (Artifact Registry + migrations + deploy)
+  # once the Google Cloud project exists. See README.md, "Deployment".

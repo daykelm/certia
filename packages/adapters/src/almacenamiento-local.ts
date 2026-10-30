@@ -2,7 +2,7 @@ import { mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { dirname, resolve, sep } from "node:path";
 import type { Almacenamiento } from "./interfaces.js";
 
-/** Almacenamiento en disco para desarrollo. En producción se usa Cloud Storage. */
+/** Disk storage for development. Production uses Cloud Storage. */
 export class AlmacenamientoLocal implements Almacenamiento {
   private readonly raiz: string;
 
@@ -16,7 +16,7 @@ export class AlmacenamientoLocal implements Almacenamiento {
   private ruta(relativa: string): string {
     const absoluta = resolve(this.raiz, relativa);
     if (absoluta !== this.raiz && !absoluta.startsWith(this.raiz + sep)) {
-      throw new Error("Ruta fuera del almacenamiento");
+      throw new Error("Path outside the storage root");
     }
     return absoluta;
   }
@@ -45,7 +45,7 @@ export class AlmacenamientoLocal implements Almacenamiento {
   }
 
   async urlTemporal(ruta: string) {
-    // En local no hay firma: la API sirve el archivo comprobando la sesión.
+    // No signing locally: the API serves the file after checking the session.
     return `${this.urlBase}/${encodeURI(ruta)}`;
   }
 }

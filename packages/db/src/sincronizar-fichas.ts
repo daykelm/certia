@@ -9,9 +9,9 @@ function hashFicha(ficha: Ficha): string {
 }
 
 /**
- * Publica en la base de datos las fichas del catálogo.
- * Las versiones nuevas se insertan; si una versión ya publicada ha cambiado,
- * falla: los cambios normativos deben crear una versión nueva (decisión D3).
+ * Publishes the catalog's fichas to the database.
+ * New versions are inserted; if an already published version has changed, it fails:
+ * regulatory changes must create a new version (decision D3).
  */
 export async function sincronizarFichas(db: Db, fichas: Ficha[]) {
   const resultado = { nuevas: [] as string[], sinCambios: [] as string[] };
@@ -34,7 +34,7 @@ export async function sincronizarFichas(db: Db, fichas: Ficha[]) {
       resultado.nuevas.push(claveFicha(ficha));
     } else if (existente.hash !== hash) {
       throw new Error(
-        `La ficha ${claveFicha(ficha)} ya estaba publicada y ha cambiado. Crea una versión nueva en lugar de modificarla.`,
+        `Ficha ${claveFicha(ficha)} was already published and has changed. Create a new version instead of editing it.`,
       );
     } else {
       resultado.sinCambios.push(claveFicha(ficha));

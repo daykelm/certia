@@ -89,7 +89,7 @@ export function App() {
   );
 }
 
-/** Formulario generado a partir de los campos de la ficha (F-03). */
+/** Form generated from the ficha's fields (F-03). */
 function Calculadora({ ficha }: { ficha: Ficha }) {
   const [datos, setDatos] = useState<Record<string, unknown>>({});
   const [resultado, setResultado] = useState<Comparacion>();

@@ -11,21 +11,21 @@ export interface ContextoTarea {
 export type Manejador = (payload: Record<string, unknown>, ctx: ContextoTarea) => Promise<void>;
 
 /**
- * Registro de tareas en segundo plano. Cada tipo de trabajo encolado
- * con `cola.encolar(tipo, payload)` necesita su manejador aquí.
+ * Background job registry. Every job type enqueued with
+ * `cola.encolar(tipo, payload)` needs a handler here.
  */
 export const manejadores: Record<string, Manejador> = {
-  /** Prueba de extremo a extremo de la cola. */
+  /** End-to-end check of the queue. */
   "sistema.ping": async (payload) => {
     console.log("[worker] ping", payload);
   },
 
-  // TODO(F-06): convertir a PDF, renombrar y comprimir un documento subido.
+  // TODO(F-06): convert an uploaded document to PDF, rename and compress it.
   // "documento.normalizar": async ({ documentoId }, { db, adaptadores }) => { ... },
 
-  // TODO(F-05): clasificar el documento y extraer los campos de la ficha.
+  // TODO(F-05): classify the document and extract the ficha's fields.
   // "documento.extraer": async ({ documentoId }, { db, adaptadores, catalogo }) => { ... },
 
-  // TODO(F-13): avisos diarios de expedientes y lotes atascados.
+  // TODO(F-13): daily alerts for stalled expedientes and lotes.
   // "paneles.avisos_atascos": async (_, { db, adaptadores }) => { ... },
 };

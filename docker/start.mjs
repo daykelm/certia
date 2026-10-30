@@ -1,4 +1,4 @@
-// Punto de entrada de la imagen: arranca la API, el worker o las migraciones según APP_MODE.
+// Image entrypoint: starts the API, the worker or the migrations depending on APP_MODE.
 const entradas = {
   api: "./apps/api/dist/index.js",
   worker: "./apps/worker/dist/index.js",
@@ -8,7 +8,7 @@ const entradas = {
 const modo = process.env.APP_MODE ?? "api";
 const entrada = entradas[modo];
 if (!entrada) {
-  console.error(`APP_MODE no válido: "${modo}". Usa: ${Object.keys(entradas).join(", ")}`);
+  console.error(`Invalid APP_MODE: "${modo}". Use: ${Object.keys(entradas).join(", ")}`);
   process.exit(1);
 }
 await import(entrada);

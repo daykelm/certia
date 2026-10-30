@@ -49,7 +49,7 @@ export async function rutasActuaciones(app: FastifyInstance, { db, catalogo }: S
     );
   }
 
-  /** Listado filtrable (F-17). */
+  /** Filterable list (F-17). */
   app.get("/", async (req) => {
     const u = usuarioDe(req);
     const q = z
@@ -77,7 +77,7 @@ export async function rutasActuaciones(app: FastifyInstance, { db, catalogo }: S
       .limit(q.limite);
   });
 
-  /** Alta de expediente con su contacto (F-04). */
+  /** Creates an expediente together with its contact (F-04). */
   app.post("/", { preHandler: requiereRol("gestion") }, async (req, rep) => {
     const u = usuarioDe(req);
     const body = CrearActuacionSchema.parse(req.body);
@@ -122,7 +122,7 @@ export async function rutasActuaciones(app: FastifyInstance, { db, catalogo }: S
     return rep.code(201).send(creada);
   });
 
-  /** Ficha del expediente: datos, checklist, ahorro e historial. */
+  /** Expediente detail: data, checklist, savings and history. */
   app.get<{ Params: { id: string } }>("/:id", async (req) => {
     const u = usuarioDe(req);
     const { a, ficha } = await cargar(req.params.id, u.organizationId);
@@ -139,7 +139,7 @@ export async function rutasActuaciones(app: FastifyInstance, { db, catalogo }: S
     };
   });
 
-  /** Actualiza los datos de la ficha y recalcula el ahorro. */
+  /** Updates the ficha data and recalculates the savings. */
   app.patch<{ Params: { id: string } }>("/:id/datos", { preHandler: requiereRol("gestion") }, async (req) => {
     const u = usuarioDe(req);
     const cambios = z.record(z.unknown()).parse(req.body);
@@ -164,7 +164,7 @@ export async function rutasActuaciones(app: FastifyInstance, { db, catalogo }: S
     });
   });
 
-  /** Cambio de estado manual, validado por la máquina de estados. */
+  /** Manual state change, validated by the state machine. */
   app.post<{ Params: { id: string } }>(
     "/:id/transiciones",
     { preHandler: requiereRol("gestion", "verificacion") },

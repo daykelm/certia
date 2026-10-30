@@ -38,7 +38,7 @@ export function usuarioDe(req: FastifyRequest): Usuario {
   return req.usuario;
 }
 
-/** preHandler que exige al menos uno de los roles (F-01). Los administradores pasan siempre. */
+/** preHandler requiring at least one of the roles (F-01). Admins always pass. */
 export function requiereRol(...roles: Rol[]) {
   return async (req: FastifyRequest, _rep: FastifyReply) => {
     const u = usuarioDe(req);

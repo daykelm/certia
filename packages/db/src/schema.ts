@@ -16,13 +16,13 @@ import {
 } from "drizzle-orm/pg-core";
 
 /**
- * Esquema de Certia. Ver PROJECT.md §8.
+ * Certia database schema. See PROJECT.md §8.
  *
- * Convenciones:
- * - Todas las tablas de negocio llevan organization_id (decisión D10).
- * - Los datos propios de cada ficha van en `datos` (JSONB) y se validan con la ficha.
- * - Los campos *_cifrado guardan valores cifrados a nivel de aplicación (F-16).
- * - Cada cambio relevante se registra en `events` (F-02).
+ * Conventions:
+ * - Every business table has organization_id (decision D10).
+ * - Ficha-specific data lives in `datos` (JSONB) and is validated against the ficha.
+ * - *_cifrado columns hold values encrypted at the application level (F-16).
+ * - Every relevant change is recorded in `events` (F-02).
  */
 
 const id = () => uuid("id").primaryKey().defaultRandom();
@@ -74,7 +74,7 @@ export const contacts = pgTable(
     email: text("email"),
     telefono: text("telefono"),
     dniCifrado: text("dni_cifrado"),
-    /** Hash con clave para buscar por DNI sin descifrar. */
+    /** Keyed hash used to search by DNI without decrypting. */
     dniHash: text("dni_hash"),
     ibanCifrado: text("iban_cifrado"),
     titularCuentaCifrado: text("titular_cuenta_cifrado"),
@@ -100,7 +100,7 @@ export const leads = pgTable(
   (t) => [index("leads_org_estado_idx").on(t.organizationId, t.estado)],
 );
 
-/** Copia publicada de cada versión de ficha. Inmutable (decisión D3). */
+/** Published copy of each ficha version. Immutable (decision D3). */
 export const fichaVersions = pgTable(
   "ficha_versions",
   {
@@ -128,7 +128,7 @@ export const actuaciones = pgTable(
     fichaCodigo: text("ficha_codigo").notNull(),
     fichaVersion: integer("ficha_version").notNull(),
     estado: text("estado").notNull().default("lead"),
-    /** Momento del último cambio de estado: base del semáforo (F-13). */
+    /** Time of the last state change: drives the traffic light (F-13). */
     estadoDesde: timestamp("estado_desde", { withTimezone: true }).notNull().defaultNow(),
     comunidadAutonoma: text("comunidad_autonoma"),
     anio: integer("anio"),
@@ -163,7 +163,7 @@ export const documents = pgTable(
     datosExtraidos: jsonb("datos_extraidos").$type<Record<string, unknown>>(),
     confianza: jsonb("confianza").$type<Record<string, number>>(),
     motivoRechazo: text("motivo_rechazo"),
-    /** Null si lo subió el beneficiario desde el portal. */
+    /** Null when uploaded by the beneficiary through the portal. */
     subidoPor: uuid("subido_por").references(() => users.id),
     createdAt: creado(),
     updatedAt: actualizado(),
@@ -192,7 +192,7 @@ export const lotes = pgTable(
     organizationId: org(),
     referencia: text("referencia").notNull(),
     fichaCodigo: text("ficha_codigo").notNull(),
-    /** Valores de las claves de agrupación, p. ej. { comunidad_autonoma, anio }. */
+    /** Grouping key values, e.g. { comunidad_autonoma, anio }. */
     clave: jsonb("clave").$type<Record<string, string>>().notNull(),
     estado: text("estado").notNull().default("borrador"),
     estadoDesde: timestamp("estado_desde", { withTimezone: true }).notNull().defaultNow(),
@@ -221,7 +221,7 @@ export const loteActuaciones = pgTable(
   },
   (t) => [
     primaryKey({ columns: [t.loteId, t.actuacionId] }),
-    // Un expediente solo puede estar en un lote.
+    // An expediente can only belong to one lote.
     uniqueIndex("lote_actuaciones_actuacion_uq").on(t.actuacionId),
   ],
 );
@@ -236,7 +236,7 @@ export const tasks = pgTable(
     titulo: text("titulo").notNull(),
     descripcion: text("descripcion"),
     origen: text("origen").notNull().default("interno"),
-    /** 1 = máxima. */
+    /** 1 = highest. */
     prioridad: integer("prioridad").notNull().default(3),
     responsableId: uuid("responsable_id").references(() => users.id),
     venceAt: timestamp("vence_at", { withTimezone: true }),
@@ -248,7 +248,7 @@ export const tasks = pgTable(
   (t) => [index("tasks_responsable_idx").on(t.organizationId, t.responsableId, t.abierta)],
 );
 
-/** Registro append-only de todo lo que pasa (F-02). Fuente del historial, semáforo y KPIs. */
+/** Append-only log of everything that happens (F-02). Source for history, traffic light and KPIs. */
 export const events = pgTable(
   "events",
   {
@@ -282,7 +282,7 @@ export const objectives = pgTable(
   (t) => [uniqueIndex("objectives_uq").on(t.userId, t.mes, t.metrica)],
 );
 
-/** Cola de tareas en Postgres para desarrollo y entornos sin Cloud Tasks. */
+/** Postgres-backed job queue for development and environments without Cloud Tasks. */
 export const jobs = pgTable(
   "jobs",
   {
