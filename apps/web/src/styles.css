@@ -1,0 +1,64 @@
+:root {
+  --fondo: #f6f7f4;
+  --superficie: #ffffff;
+  --texto: #1d2420;
+  --suave: #5f6b64;
+  --borde: #dfe4df;
+  --acento: #1f7a55;
+  --verde: #2e9e6a;
+  --amarillo: #d9a521;
+  --rojo: #c8463d;
+  color-scheme: light;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fondo: #121614;
+    --superficie: #1b211e;
+    --texto: #e7ece9;
+    --suave: #9aa59f;
+    --borde: #2c3530;
+    --acento: #4cc08b;
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--fondo); color: var(--texto); }
+
+.pagina { max-width: 1100px; margin: 0 auto; padding: 24px 16px 48px; }
+header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 24px; }
+h1 { margin: 0; font-size: 28px; color: var(--acento); letter-spacing: -0.02em; }
+h2 { margin: 0 0 16px; font-size: 18px; }
+.sub { color: var(--suave); }
+
+main { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+.tarjeta { background: var(--superficie); border: 1px solid var(--borde); border-radius: 12px; padding: 20px; }
+
+label { display: grid; gap: 4px; font-size: 14px; color: var(--suave); margin-bottom: 12px; }
+label.check { display: flex; align-items: center; gap: 8px; color: var(--texto); }
+input, select {
+  font: inherit; color: var(--texto); background: var(--fondo);
+  border: 1px solid var(--borde); border-radius: 8px; padding: 8px 10px;
+}
+button {
+  font: inherit; font-weight: 600; color: #fff; background: var(--acento);
+  border: 0; border-radius: 8px; padding: 10px 14px; cursor: pointer; width: 100%;
+}
+
+table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 14px; }
+th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--borde); }
+tr.mejor td { font-weight: 600; color: var(--acento); }
+
+.aviso, .errores { color: var(--rojo); font-size: 14px; }
+.vacio { color: var(--suave); font-size: 14px; }
+
+.semaforo { list-style: none; margin: 0; padding: 0; }
+.semaforo li { display: grid; grid-template-columns: 12px 1fr auto auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--borde); font-size: 14px; }
+.punto { width: 10px; height: 10px; border-radius: 50%; }
+.punto.verde { background: var(--verde); }
+.punto.amarillo { background: var(--amarillo); }
+.punto.rojo { background: var(--rojo); }
+.estado { color: var(--suave); }
+.dias { font-variant-numeric: tabular-nums; }

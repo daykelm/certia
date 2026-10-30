@@ -1,0 +1,20 @@
+{
+  "name": "@certia/fichas",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Definiciones de fichas (YAML) y catálogo.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "check": "tsx src/check.ts",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@certia/core": "workspace:*",
+    "yaml": "^2.8.0"
+  }
+}

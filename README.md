@@ -22,8 +22,8 @@ Documentación del proyecto:
 | Frontend | React + Vite |
 | Base de datos | PostgreSQL 16 + Drizzle ORM |
 | Validación | Zod (compartido entre frontend y API) |
-| Tareas en segundo plano | Worker propio + Cloud Tasks (local: cola en Postgres) |
-| Almacenamiento de archivos | Google Cloud Storage (local: emulador) |
+| Tareas en segundo plano | Worker propio con cola en Postgres (Cloud Tasks opcional en producción) |
+| Almacenamiento de archivos | Google Cloud Storage (local: disco) |
 | PDF y plantillas | docxtemplater + Gotenberg |
 | Extracción de datos | Modelo con visión vía Vertex AI |
 | Autenticación | Login con Google (OIDC), limitado al dominio de la organización |
@@ -46,8 +46,9 @@ certia/
 │   ├── adapters/     # Storage, colas, IA, email, PDF (interfaces + implementaciones)
 │   └── shared/       # Tipos y esquemas Zod compartidos
 ├── docker/
-│   ├── Dockerfile    # Una imagen para api y worker
-│   └── compose.yml   # Entorno local completo
+│   ├── Dockerfile    # Una imagen para api (con el frontend), worker y migraciones
+│   ├── start.mjs     # Arranque según APP_MODE
+│   └── compose.yml   # Postgres y Gotenberg en local (+ perfil "app" con la imagen)
 ├── PROJECT.md
 ├── FEATURE.md
 └── pnpm-workspace.yaml
@@ -61,22 +62,41 @@ Reglas de dependencia:
 
 ## Puesta en marcha local
 
-Requisitos: Docker, Node.js 22 y pnpm 9.
+Requisitos: Docker, Node.js 22 y pnpm 10 (`corepack enable`).
 
 ```bash
 git clone https://github.com/daykelm/certia.git
 cd certia
-cp .env.example .env
+cp .env.example .env                          # rellena ENCRYPTION_KEY con: openssl rand -base64 32
 pnpm install
-docker compose -f docker/compose.yml up -d   # postgres, gotenberg, storage
+docker compose -f docker/compose.yml up -d   # postgres y gotenberg
 pnpm db:migrate
-pnpm db:seed                                  # usuarios y datos de ejemplo
+pnpm db:seed                                  # organización, usuario admin y fichas
 pnpm dev                                      # api + worker + web en modo desarrollo
 ```
 
 - Web: http://localhost:5173
-- API: http://localhost:3000
+- API: http://localhost:3000 (salud: `/api/salud`)
 - Gotenberg: http://localhost:3001
+
+En desarrollo los documentos se guardan en `.storage/` y todas las peticiones se identifican como `DEV_USER_EMAIL` hasta que esté el login con Google (F-01).
+
+### Primera vez en el repositorio
+
+El esqueleto se creó sin acceso al registro de npm, así que faltan dos archivos generados. Tras el primer `pnpm install`:
+
+```bash
+pnpm db:generate                 # crea la migración inicial en packages/db/migrations
+git add pnpm-lock.yaml packages/db/migrations
+git commit -m "chore: lockfile y migración inicial"
+```
+
+### Probar la imagen de producción en local
+
+```bash
+docker compose -f docker/compose.yml --profile app up --build
+# http://localhost:8080 (API + frontend)
+```
 
 ## Scripts
 
@@ -96,15 +116,17 @@ pnpm dev                                      # api + worker + web en modo desar
 | Variable | Descripción |
 |---|---|
 | `DATABASE_URL` | Conexión a Postgres |
-| `APP_MODE` | `api` o `worker` (la misma imagen arranca en ambos modos) |
+| `APP_MODE` | `api`, `worker` o `migrate` (la misma imagen arranca en los tres modos) |
+| `DEV_USER_EMAIL` | Solo desarrollo: usuario con el que se identifican las peticiones |
+| `STORAGE_DRIVER` / `STORAGE_LOCAL_DIR` | `local` en desarrollo (carpeta en disco) o `gcs` |
 | `AUTH_GOOGLE_CLIENT_ID` / `AUTH_GOOGLE_CLIENT_SECRET` | Credenciales OIDC de Google |
 | `AUTH_ALLOWED_DOMAIN` | Dominio de correo permitido para iniciar sesión |
-| `STORAGE_BUCKET` | Bucket de documentos |
-| `STORAGE_EMULATOR_HOST` | Solo en local |
-| `QUEUE_DRIVER` | `postgres` (local) o `cloudtasks` |
+| `STORAGE_BUCKET` | Bucket de documentos (con `gcs`) |
+| `QUEUE_DRIVER` | `postgres` o `cloudtasks` |
 | `GOTENBERG_URL` | URL interna de Gotenberg |
 | `AI_PROVIDER` / `AI_MODEL` | Proveedor y modelo de extracción |
-| `ENCRYPTION_KEY_REF` | Referencia a la clave de cifrado (local: clave en `.env`; producción: Cloud KMS) |
+| `ENCRYPTION_KEY` | Clave de cifrado en base64 (32 bytes), solo en local |
+| `ENCRYPTION_KEY_REF` | Producción: referencia a la clave en Cloud KMS |
 
 Nunca subas `.env` al repositorio.
 
