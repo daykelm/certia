@@ -83,6 +83,8 @@ Criterios de aceptación:
 - El expediente muestra: datos del beneficiario, campos de la ficha, documentos, ahorro calculado, estado, responsable, tareas e historial.
 - Los cambios de estado respetan las transiciones definidas en la ficha y explican qué falta cuando una transición no es posible.
 - Se puede reasignar el responsable de un expediente.
+- **Tipo de beneficiario**: persona física o persona jurídica. El tipo determina los campos de identificación (DNI/NIE o CIF y representante legal) y los documentos que pide la checklist (F-08), por ejemplo la escritura de poderes solo para personas jurídicas.
+- **Observaciones como historial**: cada nota se guarda con fecha y autor automáticos, y se muestra en orden cronológico junto a los cambios de estado. La última nota es visible en el listado (F-17). Nadie escribe la fecha a mano ni edita notas de otros.
 
 ## F-05 · Extracción de datos con IA y revisión — P1
 
