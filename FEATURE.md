@@ -2,7 +2,7 @@
 
 Prioridades:
 
-- **P0**: imprescindible para el piloto.
+- **P0**: imprescindible para el piloto con los socios de diseño.
 - **P1**: entra en el MVP si el plan se cumple; es lo primero que se recorta.
 - **Fase 2**: fuera del MVP, documentado para no perderlo.
 
@@ -10,37 +10,40 @@ Cada funcionalidad tiene un ID (`F-xx`) que se usa en ramas, commits y tareas.
 
 ## Resumen
 
-| ID | Funcionalidad | Prioridad | Semana |
+| ID | Funcionalidad | Prioridad | Semanas |
 |---|---|---|---|
-| F-01 | Login, usuarios y roles | P0 | 1 |
-| F-02 | Registro de eventos y auditoría | P0 | 1 |
-| F-03 | Motor de fichas y cálculo de ahorro | P0 | 2 |
-| F-04 | Contactos, leads y expedientes | P0 | 2 |
-| F-05 | Extracción de datos con IA y revisión | P1 | 4 |
-| F-06 | Portal de subida y normalización de documentos | P0 | 3 |
-| F-07 | Comparador de versiones de ficha | P1 | 4 |
-| F-08 | Checklist documental | P0 | 3 |
-| F-09 | Generación de documentos con plantillas | P0 | 5 |
-| F-10 | Lotes | P0 | 6 |
-| F-11 | Paquetes de verificación y emisión | P0 | 6 |
-| F-12 | Tareas y subsanaciones | P0 | 7 |
-| F-13 | Semáforo de atascos | P0 | 7 |
-| F-14 | KPIs y objetivos por persona | P1 | 7 |
-| F-15 | Importación de datos actuales | P0 | 8 |
-| F-16 | Cifrado de datos sensibles | P0 | 1–8 |
-| F-17 | Búsqueda y listados filtrables | P0 | 2–7 |
+| F-01 | Login, organizaciones, usuarios y roles | P0 | 1–2 |
+| F-02 | Registro de eventos y auditoría | P0 | 1–2 |
+| F-03 | Motor de fichas y cálculo de ahorro | P0 | 3–4 |
+| F-04 | Contactos, leads y expedientes | P0 | 3–4 |
+| F-05 | Extracción de datos con IA y revisión | P1 | 15–21 |
+| F-06 | Portal de subida y normalización de documentos | P0 | 5–7 |
+| F-07 | Comparador de versiones de ficha | P1 | 15–21 |
+| F-08 | Checklist documental | P0 | 5–7 |
+| F-09 | Generación de documentos con plantillas | P0 | 8–9 |
+| F-10 | Lotes | P0 | 10–11 |
+| F-11 | Paquetes de verificación y emisión | P0 | 10–11 |
+| F-12 | Tareas y subsanaciones | P0 | 12 |
+| F-13 | Semáforo de atascos | P0 | 12 |
+| F-14 | KPIs y objetivos por persona | P1 | 15–21 |
+| F-15 | Importación de expedientes | P0 | 13–14 |
+| F-16 | Cifrado de datos sensibles | P0 | 1–14 |
+| F-17 | Búsqueda y listados filtrables | P0 | 3–12 |
 
 ---
 
-## F-01 · Login, usuarios y roles — P0
+## F-01 · Login, organizaciones, usuarios y roles — P0
 
-**Como** miembro del equipo, **quiero** entrar con mi cuenta de Google de la empresa **para** no gestionar otra contraseña.
+**Como** miembro del equipo de una empresa cliente, **quiero** entrar con mi cuenta corporativa **para** no gestionar otra contraseña y ver solo los datos de mi empresa.
 
 Criterios de aceptación:
 
-- Solo pueden entrar cuentas del dominio configurado.
-- Un administrador asigna uno o varios roles: administrador, dirección, gestión, verificación, lectura.
-- Un usuario desactivado en Google Workspace pierde el acceso en su siguiente petición.
+- Cada organización tiene su dominio de correo; solo pueden entrar cuentas de ese dominio.
+- Login con Google en el MVP; Microsoft en una fase posterior.
+- Ningún usuario puede ver ni modificar datos de otra organización; hay tests que lo comprueban en cada endpoint.
+- El equipo de Certia da de alta organizaciones y su primer administrador.
+- Un administrador de la organización asigna uno o varios roles: administrador, dirección, gestión, verificación, lectura.
+- Un usuario desactivado en su proveedor de identidad pierde el acceso en su siguiente petición.
 - Cada endpoint de la API comprueba el rol; ocultar un botón en la interfaz no basta.
 - El beneficiario accede **solo** a su portal mediante un enlace firmado y con caducidad, sin cuenta.
 
@@ -200,17 +203,17 @@ Criterios de aceptación:
 - Cada usuario ve sus propios KPIs; dirección ve los de todos.
 - Exportación a CSV.
 
-## F-15 · Importación de datos actuales — P0
+## F-15 · Importación de expedientes — P0
 
-**Como** administrador, **quiero** importar los expedientes y lotes existentes **para** empezar a usar Certia sin perder historial.
+**Como** administrador de una organización nueva, **quiero** importar mis expedientes y lotes existentes **para** empezar a usar Certia sin perder historial.
 
 Criterios de aceptación:
 
-- Importación desde exportaciones CSV de las hojas y de la base de datos actuales.
+- Importación desde archivos CSV o Excel exportados de las herramientas actuales del cliente.
 - Mapeo configurable de columnas y de estados antiguos a estados nuevos.
 - Modo simulación que muestra un informe de lo que se importaría y los errores, sin escribir nada.
 - Importación idempotente: repetirla no duplica registros.
-- Importación de documentos existentes desde las carpetas de Drive, asociándolos a su expediente.
+- Importación de documentos existentes desde un archivo ZIP o una carpeta, asociándolos a su expediente.
 
 ## F-16 · Cifrado de datos sensibles — P0
 
@@ -241,14 +244,15 @@ Criterios de aceptación:
 
 | ID | Funcionalidad | Nota |
 |---|---|---|
-| F-20 | Pagos a beneficiarios | Validación de titularidad, control de duplicados, estados de pago por lote. **Primera prioridad tras el MVP.** |
+| F-18 | Alta de organizaciones en autoservicio | Registro, verificación del dominio y primer administrador sin intervención del equipo de Certia |
+| F-19 | Suscripción y facturación del servicio | Planes, facturas con IVA y cobro recurrente |
+| F-20 | Pagos a beneficiarios | Validación de titularidad, control de duplicados, estados de pago por lote |
 | F-21 | Remesas SEPA de pago | Fichero de remesa para el banco a partir de los pagos aprobados |
 | F-22 | Venta y facturación de CAE | Compradores, contratos, facturas |
 | F-23 | Conexión contable o ERP | A definir según el sistema del cliente |
-| F-24 | Nuevas fichas | Aerotermia como segunda ficha para validar la abstracción del motor |
+| F-24 | Nuevas fichas | Priorizadas por la demanda; la segunda, muy distinta de la primera para validar el motor |
 | F-25 | Editor visual de fichas | Solo si el volumen de cambios lo justifica |
 | F-26 | Recordatorios automáticos a verificadores | Sobre la base del semáforo (F-13) |
 | F-27 | WhatsApp y llamadas desde el expediente | Integración con proveedor a elegir |
 | F-28 | Portal para verificadores | Descarga directa de paquetes con acceso controlado |
 | F-29 | Firma electrónica | Solo en los supuestos que admita la normativa |
-| F-30 | Multiempresa comercial | Alta de nuevas organizaciones y facturación del servicio |

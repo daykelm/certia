@@ -4,80 +4,84 @@
 
 Los **Certificados de Ahorro Energético (CAE)** se regulan en el Real Decreto 36/2023. Cada CAE acredita 1 kWh de ahorro de energía final conseguido con una actuación de eficiencia energética. Las empresas con obligaciones de ahorro los compran, y quien genera el ahorro (o un intermediario que lo agrupa) los vende.
 
-El primer cliente es un **facilitador** del sector que gestiona hoy, sobre todo, actuaciones de **vehículo eléctrico**, y quiere ampliar a actuaciones de proyecto (envolvente, aerotermia, solar, electrodomésticos…). El catálogo oficial tiene entre 70 y 80 fichas y crece cada año.
+**Certia es un producto para las empresas que gestionan expedientes CAE**: facilitadores, sujetos delegados e instaladoras que agrupan actuaciones y las llevan hasta la emisión de los certificados. El catálogo oficial tiene entre 70 y 80 fichas, cada una con sus campos, fórmulas y documentos, y cambia con la normativa.
 
-Flujo de negocio actual:
+El flujo de trabajo es común en el sector:
 
-1. **Captación**: formularios web → lead → secuencia de emails → llamada.
-2. **Revisión documental**: el beneficiario sube documentos; el equipo revisa hasta tener un **expediente completo**.
+1. **Captación**: formularios y canales → lead → seguimiento → contacto.
+2. **Revisión documental**: el beneficiario aporta documentos; el equipo revisa hasta tener un **expediente completo**.
 3. **Lotes**: expedientes completos de la misma comunidad autónoma y año se agrupan hasta superar el mínimo de ahorro exigido.
 4. **Verificación**: el lote se envía a un verificador acreditado por ENAC; subsanaciones hasta obtener **dictamen favorable**.
 5. **Emisión**: se envía al gestor autonómico; subsanaciones hasta la **resolución de emisión**.
 6. **Venta, facturación y pago** a los beneficiarios.
 
+**Fuentes del producto.** Certia se construye a partir de la normativa y documentación pública (Real Decreto 36/2023, catálogo de fichas del Ministerio, procedimientos de las comunidades autónomas), del conocimiento general del sector y de lo que aporten los socios de diseño con su autorización. Nunca a partir de información confidencial de terceros.
+
 ## 2. Problema
 
-- La información vive en decenas de hojas de Google Sheets, sincronizadas con una base de datos mediante unos 140 scripts.
-- El equipo escribe el mismo dato en varios sitios (estado, prioridades, control de lotes, feedback diario, bonificaciones).
-- La hoja central es lenta, se rompe y cualquiera puede borrar datos por error.
-- Las fichas nuevas o sus nuevas versiones no están en la herramienta y se tramitan a mano.
+Lo habitual en el sector:
+
+- La información vive en hojas de cálculo, carpetas compartidas y herramientas sueltas, conectadas a mano o con scripts frágiles.
+- El equipo escribe el mismo dato en varios sitios: estado, prioridades, control de lotes, seguimiento diario.
+- Cada cambio normativo de una ficha obliga a rehacer cálculos, plantillas y controles a mano.
 - Las plantillas (acuerdo de cesión, declaración responsable) se editan manualmente para cada variante.
-- Los datos sensibles (DNI, cuentas bancarias) no tienen una protección robusta.
-- La persona que mantenía el sistema ya no está y no hay plan de mantenimiento.
+- Datos sensibles de beneficiarios (DNI, cuentas bancarias, domicilios) circulan sin una protección adecuada.
+- Las herramientas hechas a medida dependen de una sola persona y nadie las mantiene cuando se va.
 
-## 3. Objetivos
+## 3. Principios del producto
 
-Las cinco premisas del cliente guían todas las decisiones:
-
-1. **Unificar** herramientas al máximo.
-2. **Protección de datos** fuerte.
-3. **Robustez.**
+1. **Una sola herramienta** para todo el flujo, de la captación a la emisión.
+2. **Protección de datos** desde el diseño: cifrado, permisos por rol, auditoría y datos en la UE.
+3. **Robustez**: cada cambio queda registrado y las fichas se prueban antes de publicarse.
 4. **Escribir en un solo sitio y una sola vez.**
-5. **Mantenimiento** a medio y largo plazo.
+5. **Fichas como configuración**: una ficha nueva o un cambio normativo no requiere programar.
+6. **Multiempresa**: cada organización ve solo sus datos y configura sus roles y plantillas.
 
-Objetivo del MVP: **que los expedientes de vehículo eléctrico se gestionen de principio a fin en Certia, sin usar hojas de cálculo en la operativa diaria.**
+Objetivo del MVP: **que una empresa del sector pueda gestionar de principio a fin sus expedientes de una ficha en Certia, sin hojas de cálculo en la operativa diaria**, validado con 2–3 socios de diseño.
 
 ## 4. Alcance
 
 ### Dentro del MVP
 
-- Una ficha: **vehículo eléctrico**, versión anterior y vigente, con comparador.
+- Una ficha inicial completa (vehículo eléctrico, a confirmar con las entrevistas), con versión anterior y vigente y comparador.
+- Varias organizaciones aisladas entre sí; alta de organizaciones por el equipo de Certia.
 - Leads, beneficiarios y expedientes con flujo de estados.
 - Portal de subida de documentos para el beneficiario.
 - Normalización de documentos (PDF, renombrado, compresión).
 - Extracción de datos con IA y revisión humana.
 - Cálculo de ahorro según la ficha.
-- Generación de acuerdo de cesión y declaración responsable con cláusulas opcionales.
+- Generación de acuerdo de cesión y declaración responsable con cláusulas opcionales, con plantillas propias de cada organización.
 - Lotes: propuesta automática, paquete de verificación y de emisión.
 - Subsanaciones como tareas.
 - Semáforo de expedientes y lotes atascados, KPIs por persona.
 - Roles, auditoría y cifrado de datos sensibles.
-- Importación de los datos actuales.
+- Importación de expedientes desde hojas de cálculo.
 
 ### Fuera del MVP (fases siguientes)
 
-- Pagos a beneficiarios y remesas SEPA (primera prioridad de la fase 2).
+- Más fichas, priorizadas por la demanda de los clientes.
+- Alta de organizaciones en autoservicio y facturación de la suscripción.
+- Pagos a beneficiarios y remesas SEPA.
 - Facturación de CAE y conexión contable o ERP.
-- Otras fichas (motor preparado, pero sin configurar).
 - Editor visual de fichas.
 - WhatsApp y llamadas integradas.
 - Portal para verificadores.
 - Recordatorios automáticos a verificadores (el MVP ya detecta los atascos).
-- Sustitución de la herramienta de email marketing.
-- Multiempresa comercial (el modelo de datos ya lo contempla).
 
 ## 5. Usuarios y roles
 
+Dentro de cada organización cliente:
+
 | Rol | Qué hace |
 |---|---|
-| **Administrador** | Configuración, usuarios, acceso completo |
+| **Administrador** | Configuración de la organización, usuarios, plantillas, acceso completo |
 | **Dirección** | Paneles, KPIs y lectura de todo |
-| **Gestión** | Relación con el beneficiario: leads, documentación, revisión, subsanaciones de cliente |
+| **Gestión** | Relación con el beneficiario: leads, documentación, revisión, subsanaciones del beneficiario |
 | **Verificación** | Lotes, verificadores, gestor autonómico, emisión |
 | **Lectura** | Consulta sin edición |
 | **Beneficiario** | Acceso externo, solo a su portal de subida mediante enlace personal |
 
-Un usuario puede tener varios roles. Los datos bancarios y los documentos de identidad solo son visibles para los roles que los necesitan.
+Un usuario puede tener varios roles. Los datos bancarios y los documentos de identidad solo son visibles para los roles que los necesitan. El equipo de Certia administra el catálogo de fichas común a todas las organizaciones.
 
 ## 6. Flujos
 
@@ -131,17 +135,17 @@ Las condiciones de cada transición (por ejemplo, "checklist validado") se defin
 | D4 | **Postgres como única fuente de verdad**; datos específicos de la ficha en JSONB validado | Elimina las hojas de cálculo como intermediarias |
 | D5 | **Tabla de eventos** para cada cambio | Historial, auditoría, semáforo y KPIs sin doble escritura |
 | D6 | **`core` sin dependencias de infraestructura**; integraciones detrás de `adapters` | Lógica de negocio testeable y portabilidad entre proveedores |
-| D7 | **Google Cloud** (Cloud Run, Cloud SQL, Cloud Storage) en Madrid, dominio **certia-es.com** | El cliente ya usa Google Workspace; un solo proveedor y datos en España |
-| D8 | **Login con Google** limitado al dominio de la empresa | Altas y bajas gestionadas desde Workspace, sin contraseñas propias |
+| D7 | **Google Cloud** (Cloud Run, Cloud SQL, Cloud Storage) en Madrid, dominio **certia-es.com** | Servicios gestionados de bajo coste y datos de los clientes en España |
+| D8 | **Login con cuentas corporativas** (Google y, después, Microsoft) limitado al dominio de cada organización | Altas y bajas gestionadas por cada cliente, sin contraseñas propias |
 | D9 | **Cifrado de DNI e IBAN a nivel de aplicación** con clave en Cloud KMS | Una copia de la base de datos no expone esos datos |
-| D10 | **`organization_id` en todas las tablas** desde el primer día | Permite multiempresa sin migraciones futuras |
+| D10 | **`organization_id` en todas las tablas** y aislamiento comprobado en cada consulta | Varias organizaciones en la misma instalación sin que ninguna vea datos de otra |
 
 ### Componentes
 
 ```mermaid
 flowchart LR
     B[Beneficiario] -->|enlace personal| WEB
-    U[Equipo] --> WEB[Web React]
+    U[Equipo de cada organización] --> WEB[Web React]
     WEB --> API[API Fastify]
     API --> DB[(Postgres)]
     API --> GCS[(Cloud Storage)]
@@ -160,7 +164,7 @@ El código, las tablas y las columnas están en inglés; los términos del domin
 
 | Tabla | Contenido principal |
 |---|---|
-| `organizations` | Empresa usuaria |
+| `organizations` | Empresa cliente |
 | `users`, `user_roles` | Usuarios y roles |
 | `contacts` | Beneficiarios (datos sensibles cifrados) |
 | `leads` | Origen, canal, estado de contacto |
@@ -177,52 +181,48 @@ El esquema detallado vive en `packages/db`.
 
 ## 9. Plan de entregas
 
-Supuesto: **2 desarrolladores, sprints de una semana, unas 8 semanas** hasta el piloto. Cada sprint termina con una demo en staging.
+Supuesto: **un ingeniero a 30 horas por semana**, con una demo cada dos semanas en staging. En paralelo, la parte de negocio valida el producto con el mercado.
 
-| Semana | Entrega |
-|---|---|
-| **1** | Repositorio, Docker local, CI, despliegue a staging, login con Google, roles, esquema base, eventos |
-| **2** | Motor de fichas y cálculo, ficha de vehículo eléctrico v1 y v2 con casos de prueba, contactos y expedientes con flujo de estados |
-| **3** | Documentos: portal de subida, normalización a PDF, compresión, checklist documental |
-| **4** | Extracción con IA y pantalla de revisión (documento junto a datos), comparador de versiones de ficha |
-| **5** | Generación de acuerdo de cesión y declaración responsable con cláusulas opcionales |
-| **6** | Lotes: propuesta automática, paquetes de verificación y emisión con validación de nombres y tamaños |
-| **7** | Tareas y subsanaciones, semáforo, KPIs por persona, vista "mis tareas" |
-| **8** | Importación de datos actuales, cifrado y auditoría revisados, pruebas con usuarios, **piloto** en paralelo con las hojas actuales |
+| Semanas | Producto | Validación con el mercado |
+|---|---|---|
+| **1–2** | Base: accesos, login, organizaciones, roles, despliegue | Entrevistas con 5–10 empresas del sector |
+| **3–4** | Motor de fichas y expedientes | Elegir la ficha inicial y cerrar 2–3 socios de diseño |
+| **5–7** | Portal del beneficiario, documentos y checklist | Recoger plantillas y requisitos de los socios de diseño |
+| **8–9** | Acuerdos y declaraciones con plantillas por organización | Revisión de plantillas con los socios |
+| **10–11** | Lotes y paquetes de verificación y emisión | Especificaciones de formato por comunidad autónoma |
+| **12** | Subsanaciones y semáforo | — |
+| **13–14** | Importación y **piloto** con los socios de diseño | Piloto en paralelo con sus herramientas actuales |
+| **15–21** | IA de extracción, comparador de fichas y KPIs | Ajustes del piloto y primeras ventas |
 
-Después del piloto: 2 a 4 semanas de operativa en paralelo, ajustes y retirada de las hojas de cálculo para vehículo eléctrico.
-
-### Para ir más rápido
-
-- Si hay que recortar, se mueven a fase 2 en este orden: comparador de fichas (F-07), KPIs por persona (F-14), extracción con IA (F-05, sustituida temporalmente por entrada manual asistida).
-- Lo que no se recorta nunca: fuente única de datos, flujo de estados, lotes y seguridad.
+Lo que no se aplaza nunca: fuente única de datos, aislamiento entre organizaciones, flujo de estados, lotes y seguridad.
 
 ## 10. Criterios de éxito del MVP
 
-- Ningún expediente de vehículo eléctrico se gestiona fuera de Certia.
+- 2–3 socios de diseño gestionan sus expedientes de la ficha inicial en Certia, sin hojas de cálculo.
 - Cada cambio de estado se escribe una sola vez.
 - Dirección ve atascos y KPIs sin que nadie actualice nada a mano.
 - Montar y empaquetar un lote pasa de horas a minutos.
 - Ningún paquete enviado a verificación o emisión se rechaza por nombres o tamaños de archivo.
+- Al menos un socio de diseño acepta pasar a una suscripción de pago.
 
 ## 11. Riesgos y supuestos
 
 | Riesgo | Mitigación |
 |---|---|
-| Acceso incompleto al código y datos actuales | Prioridad de la semana 1; la importación parte de exportaciones de Sheets y base de datos |
-| Reglas de negocio no documentadas | Vídeos de formación del cliente y sesiones cortas con el equipo de gestión y verificación |
+| El problema o la ficha elegida no son los que más pagan en el mercado | Entrevistas antes de construir en profundidad; la ficha inicial se decide con esos datos |
+| No conseguir socios de diseño | Red de contactos del socio de negocio; condiciones preferentes para los primeros clientes |
+| Cada empresa trabaja de forma distinta | Separar el proceso común (producto) de las preferencias de cada empresa (configuración) |
 | Cambios normativos durante el desarrollo | Versionado de fichas desde el inicio |
-| Errores en la migración de datos | Importación idempotente, informe de diferencias y operativa en paralelo |
-| Rechazo del equipo al cambio | Piloto con 2 o 3 usuarios clave antes de abrirlo a todos |
+| Errores en la importación de datos | Importación idempotente, informe de diferencias y operativa en paralelo |
+| Uso de información confidencial de terceros | Construir desde fuentes públicas; los datos de socios solo con autorización escrita y anonimizados |
 | Responsabilidad sobre el cálculo de ahorro | Casos de prueba por ficha y validación final del verificador |
+| Dedicación parcial del equipo | Alcance por módulos y prioridades fijas; lo esencial primero |
 
 ## 12. Preguntas abiertas
 
-- Volumen mensual de leads, expedientes y documentos por expediente.
-- Detalle de los parámetros que cambian entre la versión anterior y la vigente de la ficha de vehículo eléctrico.
+- Qué tipo de empresa compra primero: facilitadores, sujetos delegados o instaladoras.
+- Qué fichas concentran más volumen de expedientes en el mercado.
+- Cuánto pagaría una empresa por mes, y si prefiere precio por usuario, por organización o por volumen.
 - Especificación oficial de nombres y formatos de archivo para verificación y emisión por comunidad autónoma.
-- Plantillas actuales (acuerdo de cesión, declaración responsable, convenio) en formato editable.
-- Lista de cláusulas opcionales y cuándo aplica cada una.
-- Qué datos del sistema actual hay que importar y desde qué fecha.
-- Quién será el responsable interno del producto en el lado del cliente.
-- Modelo de mantenimiento y soporte tras la entrega.
+- Qué cláusulas de los documentos generados son comunes y cuáles propias de cada empresa.
+- Qué herramientas usan hoy los clientes potenciales y desde dónde habría que importar.

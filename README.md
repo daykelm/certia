@@ -1,10 +1,12 @@
 # Certia
 
-Platform to manage **Energy Savings Certificate (CAE, *Certificados de Ahorro Energético*)** files in Spain: from capturing the beneficiary and collecting documents to building lotes, verification and issuance.
+Multi-company SaaS for companies that manage **Energy Savings Certificate (CAE, *Certificados de Ahorro Energético*)** files in Spain (facilitators, delegated parties, installers): from capturing the beneficiary and collecting documents to building lotes, verification and issuance.
 
 Certia separates a **generic engine** (expedientes, documents, workflows, lotes, tasks) from the actuación **fichas**, which are defined as configuration. Adding a new kind of actuación (electric vehicle, heat pump, building envelope, appliances…) means adding a ficha, not writing code.
 
-> Status: **MVP in progress.** First supported ficha: electric vehicle (previous and current version).
+> Status: **MVP in progress**, to be validated with 2–3 design partners. Sample ficha: electric vehicle (illustrative values).
+>
+> Certia is built from public regulation and documentation (Real Decreto 36/2023, the Ministry's ficha catalog, regional procedures) and general sector knowledge. Never commit confidential material from third parties (client templates, data, internal documents) unless a written agreement allows it.
 
 Project documentation (in Spanish, for the client):
 
