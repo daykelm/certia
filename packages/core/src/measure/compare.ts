@@ -1,8 +1,8 @@
 import { calculateSavings, type CalculationResult } from "./calculation.js";
-import type { Ficha } from "./schema.js";
+import type { Measure } from "./schema.js";
 
 /**
- * Ficha version comparator (F-07).
+ * Measure version comparator (F-07).
  * Calculates the savings for the same data with every version and flags the most favorable one.
  */
 
@@ -20,16 +20,16 @@ export interface Comparison {
   best?: { code: string; version: number; kwh: number };
 }
 
-export function compareVersions(fichas: Ficha[], data: Record<string, unknown>): Comparison {
-  const typesByVersion = fichas.map((f) => new Set(f.documents.map((d) => d.type)));
+export function compareVersions(measures: Measure[], data: Record<string, unknown>): Comparison {
+  const typesByVersion = measures.map((m) => new Set(m.documents.map((d) => d.type)));
 
-  const versions = fichas.map((ficha, i) => {
+  const versions = measures.map((measure, i) => {
     const own = typesByVersion[i] ?? new Set<string>();
     const others = typesByVersion.filter((_, j) => j !== i);
     return {
-      code: ficha.code,
-      version: ficha.version,
-      result: calculateSavings(ficha, data),
+      code: measure.code,
+      version: measure.version,
+      result: calculateSavings(measure, data),
       exclusiveDocuments: [...own].filter((t) => others.every((o) => !o.has(t))),
     };
   });

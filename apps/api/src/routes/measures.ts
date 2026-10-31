@@ -3,33 +3,33 @@ import { calculateSavings, compareVersions } from "@certia/core";
 import { CalculateSchema } from "@certia/shared";
 import { currentUser, HttpError, type Services } from "../context.js";
 
-export async function fichaRoutes(app: FastifyInstance, { catalog }: Services) {
+export async function measureRoutes(app: FastifyInstance, { catalog }: Services) {
   app.addHook("preHandler", async (req) => void currentUser(req));
 
   /** Catalog summary. */
   app.get("/", async () =>
-    catalog.all().map((f) => ({ code: f.code, version: f.version, name: f.name, validity: f.validity })),
+    catalog.all().map((m) => ({ code: m.code, version: m.version, name: m.name, validity: m.validity })),
   );
 
   /** Full definition of a version (used by the frontend to build forms). */
   app.get<{ Params: { code: string; version: string } }>("/:code/:version", async (req) => {
-    const ficha = catalog.get(req.params.code, Number(req.params.version));
-    if (!ficha) throw new HttpError(404, "Ficha no encontrada");
-    return ficha;
+    const measure = catalog.get(req.params.code, Number(req.params.version));
+    if (!measure) throw new HttpError(404, "Measure not found");
+    return measure;
   });
 
   /** Calculates savings without persisting anything (F-03). */
   app.post<{ Params: { code: string; version: string } }>("/:code/:version/calculate", async (req) => {
-    const ficha = catalog.get(req.params.code, Number(req.params.version));
-    if (!ficha) throw new HttpError(404, "Ficha no encontrada");
+    const measure = catalog.get(req.params.code, Number(req.params.version));
+    if (!measure) throw new HttpError(404, "Measure not found");
     const { data } = CalculateSchema.parse(req.body);
-    return calculateSavings(ficha, data);
+    return calculateSavings(measure, data);
   });
 
-  /** Compares every version of a ficha using the same data (F-07). */
+  /** Compares every version of a measure using the same data (F-07). */
   app.post<{ Params: { code: string } }>("/:code/compare", async (req) => {
     const versions = catalog.versions(req.params.code);
-    if (versions.length === 0) throw new HttpError(404, "Ficha no encontrada");
+    if (versions.length === 0) throw new HttpError(404, "Measure not found");
     const { data } = CalculateSchema.parse(req.body);
     return compareVersions(versions, data);
   });

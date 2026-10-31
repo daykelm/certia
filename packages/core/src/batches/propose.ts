@@ -1,46 +1,46 @@
-import type { ExpedienteStatus } from "@certia/shared";
-import type { Grouping } from "../ficha/schema.js";
+import type { CaseStatus } from "@certia/shared";
+import type { Grouping } from "../measure/schema.js";
 
 /**
- * Automatic lote proposals (F-10).
- * Groups expedientes by the ficha's keys (e.g. region and year)
+ * Automatic batch proposals (F-10).
+ * Groups cases by the measure's keys (e.g. region and year)
  * and compares the accumulated savings with the required minimum.
  */
 
-export interface GroupableExpediente {
+export interface GroupableCase {
   id: string;
-  status: ExpedienteStatus;
+  status: CaseStatus;
   savingsKwh: number;
-  /** Values available for the keys: expediente columns and ficha fields. */
+  /** Values available for the keys: case columns and measure fields. */
   values: Record<string, unknown>;
 }
 
-export interface LoteProposal {
+export interface BatchProposal {
   key: Record<string, string>;
   label: string;
-  /** Complete expedientes that can join the lote right away. */
+  /** Complete cases that can join the batch right away. */
   complete: string[];
   totalKwh: number;
   meetsMinimum: boolean;
   missingKwh: number;
-  /** Almost-complete expedientes that would count once completed. */
+  /** Almost-complete cases that would count once completed. */
   candidates: string[];
   potentialKwh: number;
 }
 
-const CANDIDATE_STATUSES: ReadonlySet<ExpedienteStatus> = new Set(["pending_review", "incomplete"]);
+const CANDIDATE_STATUSES: ReadonlySet<CaseStatus> = new Set(["pending_review", "incomplete"]);
 
-export function proposeLotes(expedientes: GroupableExpediente[], grouping: Grouping): LoteProposal[] {
-  const groups = new Map<string, LoteProposal>();
+export function proposeBatches(cases: GroupableCase[], grouping: Grouping): BatchProposal[] {
+  const groups = new Map<string, BatchProposal>();
 
-  for (const e of expedientes) {
-    const isComplete = e.status === "complete";
-    if (!isComplete && !CANDIDATE_STATUSES.has(e.status)) continue;
+  for (const c of cases) {
+    const isComplete = c.status === "complete";
+    if (!isComplete && !CANDIDATE_STATUSES.has(c.status)) continue;
 
     const key: Record<string, string> = {};
     let missingKey = false;
     for (const k of grouping.keys) {
-      const v = e.values[k];
+      const v = c.values[k];
       if (v === undefined || v === null || v === "") missingKey = true;
       key[k] = String(v ?? "");
     }
@@ -54,12 +54,12 @@ export function proposeLotes(expedientes: GroupableExpediente[], grouping: Group
     }
 
     if (isComplete) {
-      group.complete.push(e.id);
-      group.totalKwh += e.savingsKwh;
+      group.complete.push(c.id);
+      group.totalKwh += c.savingsKwh;
     } else {
-      group.candidates.push(e.id);
+      group.candidates.push(c.id);
     }
-    group.potentialKwh += e.savingsKwh;
+    group.potentialKwh += c.savingsKwh;
   }
 
   const proposals = [...groups.values()];

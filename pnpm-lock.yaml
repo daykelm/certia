@@ -44,9 +44,9 @@ importers:
       '@certia/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@certia/fichas':
+      '@certia/measures':
         specifier: workspace:*
-        version: link:../../packages/fichas
+        version: link:../../packages/measures
       '@certia/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -106,9 +106,9 @@ importers:
       '@certia/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@certia/fichas':
+      '@certia/measures':
         specifier: workspace:*
-        version: link:../../packages/fichas
+        version: link:../../packages/measures
     devDependencies:
       tsup:
         specifier: ^8.5.0
@@ -140,9 +140,9 @@ importers:
       '@certia/core':
         specifier: workspace:*
         version: link:../core
-      '@certia/fichas':
+      '@certia/measures':
         specifier: workspace:*
-        version: link:../fichas
+        version: link:../measures
       '@certia/shared':
         specifier: workspace:*
         version: link:../shared
@@ -160,7 +160,7 @@ importers:
         specifier: ^0.31.0
         version: 0.31.11
 
-  packages/fichas:
+  packages/measures:
     dependencies:
       '@certia/core':
         specifier: workspace:*

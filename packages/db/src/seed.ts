@@ -1,12 +1,12 @@
 /**
  * Development seed data: organization, admin user and publication
- * of the catalog's fichas.
+ * of the catalog's measures.
  */
 import { eq } from "drizzle-orm";
-import { loadCatalog } from "@certia/fichas";
+import { loadCatalog } from "@certia/measures";
 import { createDb } from "./index.js";
 import { organizations, userRoles, users } from "./schema.js";
-import { syncFichas } from "./sync-fichas.js";
+import { syncMeasures } from "./sync-measures.js";
 
 const email = process.env.DEV_USER_EMAIL ?? "admin@certia-es.com";
 const domain = email.split("@")[1] ?? "certia-es.com";
@@ -33,8 +33,8 @@ try {
     .values(["admin", "director", "case_manager", "verifier"].map((role) => ({ userId: adminId, role })))
     .onConflictDoNothing();
 
-  const r = await syncFichas(db, loadCatalog().all());
-  console.log(`Fichas published: ${r.added.join(", ") || "none new"}`);
+  const r = await syncMeasures(db, loadCatalog().all());
+  console.log(`Measures published: ${r.added.join(", ") || "none new"}`);
 } finally {
   await pool.end();
 }

@@ -1,0 +1,79 @@
+# ⚠️ SAMPLE TEMPLATE — illustrative values.
+# Replace factors, formula and documents with those of the official ficha.
+code: TRA-VE
+version: 1
+name: Electric vehicle (previous version)
+description: Replacement or purchase of an electric vehicle.
+validity:
+  from: "2023-01-01"
+  to: "2025-12-31"
+
+fields:
+  - id: vehicle_type
+    label: Vehicle category
+    type: enum
+    options: [M1, N1]
+    source: document:technical_sheet
+  - id: plate_number
+    label: Plate number
+    type: text
+    source: document:vehicle_registration
+  - id: registration_date
+    label: Registration date
+    type: date
+    source: document:vehicle_registration
+
+constants:
+  annual_savings_kwh:
+    M1: 600
+    N1: 900
+  lifetime_years: 10
+
+calculation:
+  formula: "annual_savings_kwh[vehicle_type] * lifetime_years"
+
+tests:
+  - description: Passenger car (M1)
+    input: { vehicle_type: M1, plate_number: "0000AAA", registration_date: "2024-05-10" }
+    expected_kwh: 6000
+  - description: Light van (N1)
+    input: { vehicle_type: N1, plate_number: "0000BBB", registration_date: "2024-06-01" }
+    expected_kwh: 9000
+
+documents:
+  - type: id_document
+    label: Owner's ID document
+  - type: vehicle_registration
+    label: Vehicle registration certificate
+    extract: [plate_number, registration_date]
+  - type: technical_sheet
+    label: Vehicle technical sheet
+    extract: [vehicle_type]
+  - type: purchase_invoice
+    label: Purchase invoice
+  - type: assignment_agreement
+    label: Savings assignment agreement
+    generated: true
+  - type: responsible_declaration
+    label: Responsible declaration
+    generated: true
+
+grouping:
+  required: true
+  keys: [region, year]
+  min_kwh: 30000
+
+templates:
+  - id: assignment_agreement
+    document: assignment_agreement
+    file: templates/electric-vehicle/assignment_agreement_v1.docx
+    optional_clauses:
+      - id: transitional_clause
+        label: Transitional clause
+  - id: responsible_declaration
+    document: responsible_declaration
+    file: templates/electric-vehicle/responsible_declaration_v1.docx
+
+packaging:
+  max_size_mb: 10
+  name_pattern: "{reference}_{type}"

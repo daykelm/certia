@@ -1,12 +1,12 @@
 import type { DocumentStatus } from "@certia/shared";
-import { evaluateExpression } from "../ficha/calculation.js";
-import type { Ficha } from "../ficha/schema.js";
+import { evaluateExpression } from "../measure/calculation.js";
+import type { Measure } from "../measure/schema.js";
 
 /**
- * Document checklist of an expediente (F-08), derived from the ficha.
+ * Document checklist of a case (F-08), derived from its measure.
  */
 
-export interface ExpedienteDocument {
+export interface CaseDocument {
   type: string;
   status: DocumentStatus;
 }
@@ -36,11 +36,7 @@ const STATUS_RANK: Record<DocumentStatus, number> = {
   pending: 0,
 };
 
-export function buildChecklist(
-  ficha: Ficha,
-  data: Record<string, unknown>,
-  documents: ExpedienteDocument[],
-): Checklist {
+export function buildChecklist(measure: Measure, data: Record<string, unknown>, documents: CaseDocument[]): Checklist {
   const errors: string[] = [];
 
   // With several documents of the same type, the best status wins.
@@ -50,14 +46,14 @@ export function buildChecklist(
     if (!current || STATUS_RANK[doc.status] > STATUS_RANK[current]) statusByType.set(doc.type, doc.status);
   }
 
-  const items = ficha.documents.map((req) => {
+  const items = measure.documents.map((req) => {
     let applies = true;
     if (req.condition) {
       try {
-        applies = Boolean(evaluateExpression(req.condition, { ...ficha.constants, ...data }));
+        applies = Boolean(evaluateExpression(req.condition, { ...measure.constants, ...data }));
       } catch (e) {
         // Not enough data to evaluate the condition: request the document to be safe.
-        errors.push(`No se pudo evaluar la condición de "${req.type}": ${(e as Error).message}`);
+        errors.push(`Could not evaluate the condition for "${req.type}": ${(e as Error).message}`);
       }
     }
     return {

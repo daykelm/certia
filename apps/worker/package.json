@@ -13,7 +13,7 @@
     "@certia/adapters": "workspace:*",
     "@certia/core": "workspace:*",
     "@certia/db": "workspace:*",
-    "@certia/fichas": "workspace:*"
+    "@certia/measures": "workspace:*"
   },
   "devDependencies": {
     "tsup": "^8.5.0"

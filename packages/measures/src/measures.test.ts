@@ -2,13 +2,13 @@ import { describe, expect, it } from "vitest";
 import { runTests } from "@certia/core";
 import { loadCatalog } from "./index.js";
 
-describe("ficha catalog", () => {
+describe("measure catalog", () => {
   const catalog = loadCatalog();
 
   it("loads the definitions and their tests pass", () => {
     expect(catalog.all().length).toBeGreaterThan(0);
-    for (const ficha of catalog.all()) {
-      expect(runTests(ficha).every((t) => t.ok), `${ficha.code} v${ficha.version}`).toBe(true);
+    for (const measure of catalog.all()) {
+      expect(runTests(measure).every((t) => t.ok), `${measure.code} v${measure.version}`).toBe(true);
     }
   });
 

@@ -1,7 +1,7 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import type { Adapters } from "@certia/adapters";
 import type { Db } from "@certia/db";
-import type { Catalog } from "@certia/fichas";
+import type { Catalog } from "@certia/measures";
 import type { Role } from "@certia/shared";
 import type { Config } from "./config.js";
 
@@ -25,7 +25,7 @@ declare module "fastify" {
   }
 }
 
-/** Error returned to the client; messages are user-facing (Spanish). */
+/** Error returned to the client; messages are user-facing. */
 export class HttpError extends Error {
   constructor(
     public readonly status: number,
@@ -37,7 +37,7 @@ export class HttpError extends Error {
 }
 
 export function currentUser(req: FastifyRequest): CurrentUser {
-  if (!req.currentUser) throw new HttpError(401, "No autenticado");
+  if (!req.currentUser) throw new HttpError(401, "Not authenticated");
   return req.currentUser;
 }
 
@@ -46,7 +46,7 @@ export function requireRole(...roles: Role[]) {
   return async (req: FastifyRequest, _reply: FastifyReply) => {
     const u = currentUser(req);
     if (!u.roles.includes("admin") && !roles.some((r) => u.roles.includes(r))) {
-      throw new HttpError(403, "No tienes permiso para esta acción");
+      throw new HttpError(403, "You do not have permission for this action");
     }
   };
 }

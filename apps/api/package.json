@@ -13,7 +13,7 @@
     "@certia/adapters": "workspace:*",
     "@certia/core": "workspace:*",
     "@certia/db": "workspace:*",
-    "@certia/fichas": "workspace:*",
+    "@certia/measures": "workspace:*",
     "@certia/shared": "workspace:*",
     "@fastify/static": "^8.2.0",
     "drizzle-orm": "^0.44.0",

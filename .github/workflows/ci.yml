@@ -28,12 +28,9 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-          # Caching needs pnpm-lock.yaml; enable it once the lockfile is committed.
-          package-manager-cache: false
+          cache: pnpm
       - name: Dependencies
-        # Until pnpm-lock.yaml is committed, install without a lockfile.
-        run: |
-          if [ -f pnpm-lock.yaml ]; then pnpm install --frozen-lockfile; else pnpm install; fi
+        run: pnpm install --frozen-lockfile
 
       # Every check runs even if a previous one fails,
       # so a single run reports all problems.
@@ -43,16 +40,19 @@ jobs:
       - name: Types
         if: ${{ !cancelled() }}
         run: .github/scripts/step.sh Types pnpm -r --no-bail typecheck
-      - name: Fichas
+      - name: Measures
         if: ${{ !cancelled() }}
-        run: .github/scripts/step.sh Fichas pnpm fichas:check
+        run: .github/scripts/step.sh Measures pnpm measures:check
       - name: Tests
         if: ${{ !cancelled() }}
         run: .github/scripts/step.sh Tests pnpm test
+      - name: Migrations in sync with the schema
+        if: ${{ !cancelled() }}
+        # Fails if the Drizzle schema has changes without a committed migration.
+        run: .github/scripts/step.sh Migrations-drift bash -c "pnpm db:generate && git status --porcelain packages/db/migrations && test -z \"\$(git status --porcelain packages/db/migrations)\""
       - name: Migrations and seed data
         if: ${{ !cancelled() }}
-        # db:generate creates the initial migration if it is not in the repo yet.
-        run: .github/scripts/step.sh Migrations bash -c "pnpm db:generate && pnpm db:migrate && pnpm db:seed"
+        run: .github/scripts/step.sh Migrations bash -c "pnpm db:migrate && pnpm db:seed"
       - name: Build
         if: ${{ !cancelled() }}
         run: .github/scripts/step.sh Build pnpm build

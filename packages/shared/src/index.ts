@@ -5,23 +5,23 @@ export const ROLES = ["admin", "director", "case_manager", "verifier", "viewer"]
 export const RoleSchema = z.enum(ROLES);
 export type Role = z.infer<typeof RoleSchema>;
 
-/** Expediente states. See PROJECT.md §6. */
-export const EXPEDIENTE_STATUSES = [
+/** Case statuses. See PROJECT.md §6. */
+export const CASE_STATUSES = [
   "lead",
   "awaiting_documents",
   "pending_review",
   "incomplete",
   "complete",
-  "in_lote",
+  "in_batch",
   "verified",
   "issued",
   "discarded",
 ] as const;
-export const ExpedienteStatusSchema = z.enum(EXPEDIENTE_STATUSES);
-export type ExpedienteStatus = z.infer<typeof ExpedienteStatusSchema>;
+export const CaseStatusSchema = z.enum(CASE_STATUSES);
+export type CaseStatus = z.infer<typeof CaseStatusSchema>;
 
-/** Lote states. See PROJECT.md §6. */
-export const LOTE_STATUSES = [
+/** Batch statuses. See PROJECT.md §6. */
+export const BATCH_STATUSES = [
   "draft",
   "ready_for_verification",
   "in_verification",
@@ -32,20 +32,20 @@ export const LOTE_STATUSES = [
   "issuance_corrections",
   "issued",
 ] as const;
-export const LoteStatusSchema = z.enum(LOTE_STATUSES);
-export type LoteStatus = z.infer<typeof LoteStatusSchema>;
+export const BatchStatusSchema = z.enum(BATCH_STATUSES);
+export type BatchStatus = z.infer<typeof BatchStatusSchema>;
 
-/** State of each document in the checklist (F-08). */
+/** Status of each document in the checklist (F-08). */
 export const DOCUMENT_STATUSES = ["pending", "uploaded", "validated", "rejected"] as const;
 export const DocumentStatusSchema = z.enum(DOCUMENT_STATUSES);
 export type DocumentStatus = z.infer<typeof DocumentStatusSchema>;
 
-/** Origin of a task or subsanación (F-12). */
+/** Origin of a task or correction request (F-12). */
 export const TASK_ORIGINS = ["internal", "preventive", "verifier", "regional_authority"] as const;
 export const TaskOriginSchema = z.enum(TASK_ORIGINS);
 export type TaskOrigin = z.infer<typeof TaskOriginSchema>;
 
-/** Spanish autonomous communities and cities (INE codes). Values are data, kept in Spanish. */
+/** Spanish autonomous communities and cities (INE codes). The codes are data and keep their official names. */
 export const REGIONS = [
   "01-andalucia",
   "02-aragon",
@@ -72,9 +72,9 @@ export type Region = z.infer<typeof RegionSchema>;
 
 // --- API DTOs ---
 
-export const CreateExpedienteSchema = z.object({
-  fichaCode: z.string().min(1),
-  fichaVersion: z.number().int().positive(),
+export const CreateCaseSchema = z.object({
+  measureCode: z.string().min(1),
+  measureVersion: z.number().int().positive(),
   contact: z.object({
     firstName: z.string().min(1),
     lastName: z.string().optional(),
@@ -86,10 +86,10 @@ export const CreateExpedienteSchema = z.object({
   data: z.record(z.unknown()).default({}),
   channel: z.string().optional(),
 });
-export type CreateExpediente = z.infer<typeof CreateExpedienteSchema>;
+export type CreateCase = z.infer<typeof CreateCaseSchema>;
 
 export const TransitionSchema = z.object({
-  to: ExpedienteStatusSchema,
+  to: CaseStatusSchema,
   comment: z.string().optional(),
 });
 export type Transition = z.infer<typeof TransitionSchema>;
