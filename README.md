@@ -195,6 +195,7 @@ Google Cloud services:
 - Every new feature references its ID from [FEATURE.md](./FEATURE.md) (e.g. `feat(lotes): F-10 automatic lote proposals`).
 - Published ficha versions are immutable: a regulatory change creates a **new version**.
 - Sensitive personal data (DNI, IBAN) is encrypted at the application level and never appears in logs.
+- Screenshots and documents from existing systems are reference only: never copy personal data from them into code, fixtures, tests or docs. Use fictitious data. See [CLAUDE.md](./CLAUDE.md).
 
 ## License
 
