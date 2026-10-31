@@ -262,3 +262,42 @@ Criterios de aceptación:
 | F-31 | Sincronización temporal con hojas de cálculo | Durante la transición, leer y escribir en la hoja actual del cliente (Google Sheets) para convivir con ella hasta retirarla |
 | F-32 | Buzón de entrada de documentos | Una dirección de correo por organización: los documentos recibidos por email se asocian al expediente por referencia o remitente |
 | F-33 | Correo desde la cuenta del cliente | Enviar los correos al beneficiario desde un buzón del propio cliente (Google o Microsoft) mediante su API, sin guardar contraseñas |
+| F-34 | Agente de expediente | Flujo con pasos de IA que avanza cada expediente y propone; una persona confirma. Detalle abajo |
+| F-35 | Base de conocimiento con RAG | Normativa común con citas y memoria de subsanaciones por organización. Detalle abajo |
+
+### F-34 · Agente de expediente
+
+**Como** gestor, **quiero** que cada expediente se revise solo al llegar documentación **para** dedicarme a confirmar y resolver excepciones, no a teclear.
+
+Se construye por fases:
+
+1. **Revisión automática** (amplía F-05): al entrar un documento, por el portal o por email (F-32), se clasifica, se extraen los campos de la ficha y se validan documentos entre sí (mismo titular, mismo NIF, misma matrícula, fechas en plazo). Recalcula el ahorro y la checklist.
+2. **Siguiente paso propuesto**: si falta algo o hay incoherencias, redacta la petición al beneficiario; si está completo, propone pasar a "completo".
+3. **Requerimientos**: lee los requerimientos de verificadores y gestores autonómicos, crea las tareas (F-12) y propone qué documento o respuesta atiende cada uno, apoyándose en F-35.
+
+Criterios de aceptación:
+
+- Es un flujo definido con pasos de IA, ejecutado por el worker; no un agente libre que decide qué hacer.
+- El agente **propone y una persona confirma**: no envía correos, no cambia estados críticos y no envía paquetes sin aprobación.
+- Cada propuesta guarda su origen, su confianza y su justificación; quién la aprobó o corrigió queda en el historial (F-02).
+- Las herramientas del agente son funciones de Certia (leer expediente y documentos, calcular, comprobar checklist, crear propuesta, redactar correo), siempre limitadas a la organización del expediente.
+- Qué extraer y qué validar sale de la ficha: una ficha nueva no exige reprogramar el agente.
+- Proveedor de IA desplegado en la UE y con contrato que impida usar los datos para entrenar.
+
+### F-35 · Base de conocimiento con RAG
+
+**Como** gestor, **quiero** preguntar dudas normativas y ver cómo se resolvieron casos parecidos **para** decidir rápido y con fundamento.
+
+Dos espacios separados:
+
+1. **Normativa común**: Real Decreto 36/2023, catálogo de fichas con todas sus versiones, procedimientos de cada comunidad autónoma, preguntas frecuentes oficiales y criterios publicados por verificadores. Solo fuentes públicas.
+2. **Memoria de cada organización**: requerimientos recibidos y cómo se resolvieron, visibles solo para esa organización.
+
+Criterios de aceptación:
+
+- Asistente en la aplicación que responde **siempre con cita** (documento y apartado); si no hay fuente, lo dice en lugar de inventar.
+- La normativa está versionada por fecha: una consulta sobre un expediente usa la norma vigente en su fecha.
+- Aviso de cambios cuando se publica una nueva versión de una ficha o un procedimiento.
+- Índices en Postgres con pgvector, en la misma base de datos; la memoria de cada organización se filtra siempre por `organization_id`.
+- Sin datos personales en los índices: de los requerimientos se indexa el contenido, nunca nombres, DNI ni direcciones.
+- El cálculo del ahorro **nunca** depende de RAG: lo hace siempre el motor de fichas (F-03).
