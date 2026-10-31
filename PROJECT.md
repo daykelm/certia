@@ -225,4 +225,4 @@ Lo que no se aplaza nunca: fuente única de datos, aislamiento entre organizacio
 - Cuánto pagaría una empresa por mes, y si prefiere precio por usuario, por organización o por volumen.
 - Especificación oficial de nombres y formatos de archivo para verificación y emisión por comunidad autónoma.
 - Qué cláusulas de los documentos generados son comunes y cuáles propias de cada empresa.
-- Qué herramientas usan hoy los clientes potenciales y desde dónde habría que importar.
+- Qué herramientas usan hoy los clientes potenciales y desde dónde habría que importar. En las entrevistas, pedir a cada empresa que dibuje el mapa de sus sistemas (formularios, hojas, buzones, herramientas y cómo se conectan): muestra en minutos dónde les duele y qué integraciones necesita Certia (F-30 a F-33).

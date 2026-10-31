@@ -256,3 +256,7 @@ Criterios de aceptación:
 | F-27 | WhatsApp y llamadas desde el expediente | Integración con proveedor a elegir |
 | F-28 | Portal para verificadores | Descarga directa de paquetes con acceso controlado |
 | F-29 | Firma electrónica | Solo en los supuestos que admita la normativa |
+| F-30 | Formularios de captación externos | Los formularios de la web del cliente (WordPress u otros) envían leads a Certia mediante un formulario embebible o un endpoint con clave por organización |
+| F-31 | Sincronización temporal con hojas de cálculo | Durante la transición, leer y escribir en la hoja actual del cliente (Google Sheets) para convivir con ella hasta retirarla |
+| F-32 | Buzón de entrada de documentos | Una dirección de correo por organización: los documentos recibidos por email se asocian al expediente por referencia o remitente |
+| F-33 | Correo desde la cuenta del cliente | Enviar los correos al beneficiario desde un buzón del propio cliente (Google o Microsoft) mediante su API, sin guardar contraseñas |
