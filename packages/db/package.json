@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@certia/core": "workspace:*",
-    "@certia/fichas": "workspace:*",
+    "@certia/measures": "workspace:*",
     "@certia/shared": "workspace:*",
     "drizzle-orm": "^0.44.0",
     "pg": "^8.16.0"

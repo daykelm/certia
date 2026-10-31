@@ -1,18 +1,16 @@
 import { useEffect, useState } from "react";
-import type { Comparison, Field, Ficha } from "@certia/core";
+import type { Comparison, Field, Measure } from "@certia/core";
 import { REGIONS } from "@certia/shared";
 import { api, ApiError, post } from "./api";
 
-// UI copy is in Spanish (user-facing); code is in English.
-
-interface FichaSummary {
+interface MeasureSummary {
   code: string;
   version: number;
   name: string;
 }
 
 interface TrafficLightItem {
-  kind: "expediente" | "lote";
+  kind: "case" | "batch";
   id: string;
   reference: string;
   status: string;
@@ -20,19 +18,19 @@ interface TrafficLightItem {
   color: "green" | "amber" | "red";
 }
 
-const formatKwh = (n: number) => `${n.toLocaleString("es-ES")} kWh`;
+const formatKwh = (n: number) => `${n.toLocaleString("en-GB")} kWh`;
 
 export function App() {
   const [error, setError] = useState<string>();
-  const [fichas, setFichas] = useState<FichaSummary[]>([]);
+  const [measures, setMeasures] = useState<MeasureSummary[]>([]);
   const [selected, setSelected] = useState<string>();
-  const [ficha, setFicha] = useState<Ficha>();
+  const [measure, setMeasure] = useState<Measure>();
   const [trafficLight, setTrafficLight] = useState<TrafficLightItem[]>([]);
 
   useEffect(() => {
-    api<FichaSummary[]>("/fichas")
+    api<MeasureSummary[]>("/measures")
       .then((list) => {
-        setFichas(list);
+        setMeasures(list);
         const latest = list.at(-1);
         if (latest) setSelected(`${latest.code}/${latest.version}`);
       })
@@ -41,38 +39,38 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    if (selected) api<Ficha>(`/fichas/${selected}`).then(setFicha).catch((e: Error) => setError(e.message));
+    if (selected) api<Measure>(`/measures/${selected}`).then(setMeasure).catch((e: Error) => setError(e.message));
   }, [selected]);
 
   return (
     <div className="page">
       <header>
         <h1>Certia</h1>
-        <span className="subtitle">Gestión de expedientes CAE</span>
+        <span className="subtitle">Energy savings certificate case management</span>
       </header>
 
-      {error && <p className="warning">No se pudo conectar con la API: {error}</p>}
+      {error && <p className="warning">Could not reach the API: {error}</p>}
 
       <main>
         <section className="card">
-          <h2>Calculadora de ahorro</h2>
+          <h2>Savings calculator</h2>
           <label>
-            Ficha
+            Measure
             <select value={selected ?? ""} onChange={(e) => setSelected(e.target.value)}>
-              {fichas.map((f) => (
-                <option key={`${f.code}/${f.version}`} value={`${f.code}/${f.version}`}>
-                  {f.name} · v{f.version}
+              {measures.map((m) => (
+                <option key={`${m.code}/${m.version}`} value={`${m.code}/${m.version}`}>
+                  {m.name} · v{m.version}
                 </option>
               ))}
             </select>
           </label>
-          {ficha && <Calculator key={`${ficha.code}@${ficha.version}`} ficha={ficha} />}
+          {measure && <Calculator key={`${measure.code}@${measure.version}`} measure={measure} />}
         </section>
 
         <section className="card">
-          <h2>Semáforo</h2>
+          <h2>Traffic light</h2>
           {trafficLight.length === 0 ? (
-            <p className="empty">Nada atascado. Los expedientes y lotes aparecerán aquí ordenados por días sin cambios.</p>
+            <p className="empty">Nothing is stalled. Cases and batches will appear here, ordered by days without changes.</p>
           ) : (
             <ul className="traffic-light">
               {trafficLight.map((item) => (
@@ -91,8 +89,8 @@ export function App() {
   );
 }
 
-/** Form generated from the ficha's fields (F-03). */
-function Calculator({ ficha }: { ficha: Ficha }) {
+/** Form generated from the measure's fields (F-03). */
+function Calculator({ measure }: { measure: Measure }) {
   const [data, setData] = useState<Record<string, unknown>>({});
   const [comparison, setComparison] = useState<Comparison>();
   const [errors, setErrors] = useState<string[]>([]);
@@ -100,7 +98,7 @@ function Calculator({ ficha }: { ficha: Ficha }) {
   const calculate = async () => {
     setErrors([]);
     try {
-      setComparison(await post<Comparison>(`/fichas/${ficha.code}/compare`, { data }));
+      setComparison(await post<Comparison>(`/measures/${measure.code}/compare`, { data }));
     } catch (e) {
       setErrors(e instanceof ApiError ? [e.message, ...e.details] : [String(e)]);
     }
@@ -108,7 +106,7 @@ function Calculator({ ficha }: { ficha: Ficha }) {
 
   return (
     <div className="calculator">
-      {ficha.fields.map((field) => (
+      {measure.fields.map((field) => (
         <FieldInput
           key={field.id}
           field={field}
@@ -116,7 +114,7 @@ function Calculator({ ficha }: { ficha: Ficha }) {
           onChange={(v) => setData((d) => ({ ...d, [field.id]: v }))}
         />
       ))}
-      <button onClick={calculate}>Calcular y comparar versiones</button>
+      <button onClick={calculate}>Calculate and compare versions</button>
       {errors.length > 0 && (
         <ul className="errors">
           {errors.map((e) => (
@@ -128,9 +126,9 @@ function Calculator({ ficha }: { ficha: Ficha }) {
         <table>
           <thead>
             <tr>
-              <th>Versión</th>
-              <th>Ahorro</th>
-              <th>Documentos adicionales</th>
+              <th>Version</th>
+              <th>Savings</th>
+              <th>Additional documents</th>
             </tr>
           </thead>
           <tbody>
@@ -149,7 +147,7 @@ function Calculator({ ficha }: { ficha: Ficha }) {
 }
 
 function FieldInput({ field, value, onChange }: { field: Field; value: unknown; onChange: (v: unknown) => void }) {
-  const label = `${field.label}${field.unit ? ` (${field.unit})` : ""}${field.required ? "" : " · opcional"}`;
+  const label = `${field.label}${field.unit ? ` (${field.unit})` : ""}${field.required ? "" : " · optional"}`;
   switch (field.type) {
     case "boolean":
       return (

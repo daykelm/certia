@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Certia's pure domain: fichas, calculation, workflows, lotes and packaging. No infrastructure dependencies.",
+  "description": "Certia's pure domain: measures, calculation, workflows, batches and packaging. No infrastructure dependencies.",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {

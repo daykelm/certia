@@ -1,7 +1,7 @@
 import { setTimeout as sleep } from "node:timers/promises";
 import { claimJob, completeJob, createAdapters, failJob } from "@certia/adapters";
 import { createDb } from "@certia/db";
-import { loadCatalog } from "@certia/fichas";
+import { loadCatalog } from "@certia/measures";
 import { handlers, type JobContext } from "./jobs.js";
 
 const IDLE_WAIT_MS = 2000;

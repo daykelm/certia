@@ -6,8 +6,8 @@ import { ZodError } from "zod";
 import { registerAuth } from "./auth.js";
 import { HttpError, type Services } from "./context.js";
 import { dashboardRoutes } from "./routes/dashboards.js";
-import { expedienteRoutes } from "./routes/expedientes.js";
-import { fichaRoutes } from "./routes/fichas.js";
+import { caseRoutes } from "./routes/cases.js";
+import { measureRoutes } from "./routes/measures.js";
 
 export async function buildApp(services: Services) {
   const { config } = services;
@@ -25,7 +25,7 @@ export async function buildApp(services: Services) {
   app.setErrorHandler((error, req, reply) => {
     if (error instanceof ZodError) {
       return reply.code(400).send({
-        error: "Datos no válidos",
+        error: "Invalid data",
         details: error.issues.map((i) => `${i.path.join(".")}: ${i.message}`),
       });
     }
@@ -33,24 +33,24 @@ export async function buildApp(services: Services) {
       return reply.code(error.status).send({ error: error.message, details: error.details });
     }
     req.log.error(error);
-    return reply.code(500).send({ error: "Error interno" });
+    return reply.code(500).send({ error: "Internal error" });
   });
 
   app.get("/api/health", async () => {
     await services.db.execute(sql`select 1`);
-    return { ok: true, fichas: services.catalog.all().length, publicUrl: config.publicUrl };
+    return { ok: true, measures: services.catalog.all().length, publicUrl: config.publicUrl };
   });
 
   registerAuth(app, services);
-  await app.register((a) => fichaRoutes(a, services), { prefix: "/api/fichas" });
-  await app.register((a) => expedienteRoutes(a, services), { prefix: "/api/expedientes" });
+  await app.register((a) => measureRoutes(a, services), { prefix: "/api/measures" });
+  await app.register((a) => caseRoutes(a, services), { prefix: "/api/cases" });
   await app.register((a) => dashboardRoutes(a, services), { prefix: "/api/dashboards" });
 
   if (config.webDir && existsSync(config.webDir)) {
     await app.register(fastifyStatic, { root: config.webDir });
     // Frontend (SPA) routes: any non-API path returns index.html.
     app.setNotFoundHandler((req, reply) => {
-      if (req.url.startsWith("/api/")) return reply.code(404).send({ error: "No encontrado" });
+      if (req.url.startsWith("/api/")) return reply.code(404).send({ error: "Not found" });
       return reply.sendFile("index.html");
     });
   }

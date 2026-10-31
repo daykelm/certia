@@ -1,254 +1,303 @@
-# Certia — Funcionalidades del MVP
+# Certia — MVP features
 
-Prioridades:
+Priorities:
 
-- **P0**: imprescindible para el piloto.
-- **P1**: entra en el MVP si el plan se cumple; es lo primero que se recorta.
-- **Fase 2**: fuera del MVP, documentado para no perderlo.
+- **P0**: required for the pilot with the design partners.
+- **P1**: in the MVP if the plan holds; the first thing to cut.
+- **Phase 2**: out of the MVP, documented so it is not lost.
 
-Cada funcionalidad tiene un ID (`F-xx`) que se usa en ramas, commits y tareas.
+Every feature has an ID (`F-xx`) used in branches, commits and tasks.
 
-## Resumen
+## Summary
 
-| ID | Funcionalidad | Prioridad | Semana |
+| ID | Feature | Priority | Weeks |
 |---|---|---|---|
-| F-01 | Login, usuarios y roles | P0 | 1 |
-| F-02 | Registro de eventos y auditoría | P0 | 1 |
-| F-03 | Motor de fichas y cálculo de ahorro | P0 | 2 |
-| F-04 | Contactos, leads y expedientes | P0 | 2 |
-| F-05 | Extracción de datos con IA y revisión | P1 | 4 |
-| F-06 | Portal de subida y normalización de documentos | P0 | 3 |
-| F-07 | Comparador de versiones de ficha | P1 | 4 |
-| F-08 | Checklist documental | P0 | 3 |
-| F-09 | Generación de documentos con plantillas | P0 | 5 |
-| F-10 | Lotes | P0 | 6 |
-| F-11 | Paquetes de verificación y emisión | P0 | 6 |
-| F-12 | Tareas y subsanaciones | P0 | 7 |
-| F-13 | Semáforo de atascos | P0 | 7 |
-| F-14 | KPIs y objetivos por persona | P1 | 7 |
-| F-15 | Importación de datos actuales | P0 | 8 |
-| F-16 | Cifrado de datos sensibles | P0 | 1–8 |
-| F-17 | Búsqueda y listados filtrables | P0 | 2–7 |
+| F-01 | Sign-in, organizations, users and roles | P0 | 1–2 |
+| F-02 | Event log and auditing | P0 | 1–2 |
+| F-03 | Measure engine and savings calculation | P0 | 3–4 |
+| F-04 | Contacts, leads and cases | P0 | 3–4 |
+| F-05 | AI data extraction and review | P1 | 15–21 |
+| F-06 | Upload portal and document normalization | P0 | 5–7 |
+| F-07 | Measure version comparator | P1 | 15–21 |
+| F-08 | Document checklist | P0 | 5–7 |
+| F-09 | Document generation from templates | P0 | 8–9 |
+| F-10 | Batches | P0 | 10–11 |
+| F-11 | Verification and issuance packages | P0 | 10–11 |
+| F-12 | Tasks and correction requests | P0 | 12 |
+| F-13 | Stalled-items traffic light | P0 | 12 |
+| F-14 | KPIs and objectives per person | P1 | 15–21 |
+| F-15 | Case import | P0 | 13–14 |
+| F-16 | Encryption of sensitive data | P0 | 1–14 |
+| F-17 | Search and filterable lists | P0 | 3–12 |
 
 ---
 
-## F-01 · Login, usuarios y roles — P0
+## F-01 · Sign-in, organizations, users and roles — P0
 
-**Como** miembro del equipo, **quiero** entrar con mi cuenta de Google de la empresa **para** no gestionar otra contraseña.
+**As** a team member at a customer company, **I want** to sign in with my corporate account **so that** I do not manage another password and only see my company's data.
 
-Criterios de aceptación:
+Acceptance criteria:
 
-- Solo pueden entrar cuentas del dominio configurado.
-- Un administrador asigna uno o varios roles: administrador, dirección, gestión, verificación, lectura.
-- Un usuario desactivado en Google Workspace pierde el acceso en su siguiente petición.
-- Cada endpoint de la API comprueba el rol; ocultar un botón en la interfaz no basta.
-- El beneficiario accede **solo** a su portal mediante un enlace firmado y con caducidad, sin cuenta.
+- Each organization has its email domain; only accounts from that domain can sign in.
+- Google sign-in in the MVP; Microsoft in a later phase.
+- No user can see or change another organization's data; tests check this on every endpoint.
+- The Certia team creates organizations and their first admin.
+- An organization admin assigns one or more roles: admin, director, case manager, verifier, viewer.
+- A user deactivated in their identity provider loses access on their next request.
+- Every API endpoint checks the role; hiding a button in the UI is not enough.
+- The beneficiary accesses **only** their portal through a signed, expiring link, without an account.
 
-## F-02 · Registro de eventos y auditoría — P0
+## F-02 · Event log and auditing — P0
 
-**Como** dirección, **quiero** saber quién cambió qué y cuándo **para** tener trazabilidad y no depender de notas manuales.
+**As** a director, **I want** to know who changed what and when **so that** there is traceability without relying on manual notes.
 
-Criterios de aceptación:
+Acceptance criteria:
 
-- Cada creación, cambio de estado, edición de campo, subida o generación de documento crea un evento.
-- Los eventos no se pueden editar ni borrar desde la aplicación.
-- Cada expediente y cada lote muestran su historial cronológico.
-- Las consultas a datos sensibles (DNI, IBAN) también quedan registradas.
+- Every creation, status change, field edit, upload or document generation creates an event.
+- Events cannot be edited or deleted from the application.
+- Every case and every batch shows its chronological history.
+- Access to sensitive data (ID numbers, IBANs) is also recorded.
 
-## F-03 · Motor de fichas y cálculo de ahorro — P0
+## F-03 · Measure engine and savings calculation — P0
 
-**Como** equipo técnico, **quiero** definir cada ficha como configuración **para** añadir tipos de actuación sin cambiar el código del motor.
+**As** the technical team, **I want** to define each measure as configuration **so that** new kinds of efficiency actions can be added without changing the engine's code.
 
-Criterios de aceptación:
+Acceptance criteria:
 
-- Una ficha define: código, versión, vigencia, campos, fórmula, documentos requeridos, reglas de agrupación, plantillas, reglas de empaquetado y flujo.
-- Las fichas se validan al arrancar y en CI (`pnpm fichas:check`); una ficha inválida impide el despliegue.
-- Cada ficha incluye casos de prueba de cálculo que deben pasar en CI.
-- La fórmula se evalúa con un evaluador seguro, sin ejecutar código arbitrario.
-- Un expediente queda anclado a una versión concreta de ficha.
-- MVP: ficha de vehículo eléctrico en su versión anterior y vigente.
+- A measure defines: code, version, validity, fields, formula, required documents, grouping rules, templates, packaging rules and workflow.
+- Measures are validated at startup and in CI (`pnpm measures:check`); an invalid measure blocks the deployment.
+- Every measure includes calculation test cases that must pass in CI.
+- The formula is evaluated with a safe evaluator, without running arbitrary code.
+- A case is pinned to a specific measure version.
+- MVP: electric vehicle measure in its previous and current version.
 
-## F-04 · Contactos, leads y expedientes — P0
+## F-04 · Contacts, leads and cases — P0
 
-**Como** gestor, **quiero** ver y trabajar cada expediente en una sola pantalla **para** no tener que actualizar varias hojas.
+**As** a case manager, **I want** to see and work on each case in a single screen **so that** I do not have to update several spreadsheets.
 
-Criterios de aceptación:
+Acceptance criteria:
 
-- Los formularios web crean el lead directamente en Certia mediante un endpoint público protegido contra abuso.
-- Se guarda el canal de origen del lead.
-- Convertir un lead crea el contacto y el expediente con la ficha elegida.
-- El expediente muestra: datos del beneficiario, campos de la ficha, documentos, ahorro calculado, estado, responsable, tareas e historial.
-- Los cambios de estado respetan las transiciones definidas en la ficha y explican qué falta cuando una transición no es posible.
-- Se puede reasignar el responsable de un expediente.
+- Web forms create the lead directly in Certia through a public endpoint protected against abuse.
+- The lead's source channel is stored.
+- Converting a lead creates the contact and the case with the chosen measure.
+- The case shows: beneficiary data, measure fields, documents, calculated savings, status, assignee, tasks and history.
+- Status changes follow the transitions defined in the measure and explain what is missing when a transition is not possible.
+- A case can be reassigned.
+- **Beneficiary type**: individual or legal entity. The type determines the identification fields (national ID or company tax ID and legal representative) and the documents the checklist asks for (F-08), for example a power of attorney only for legal entities.
+- **Notes as history**: each note is saved with an automatic date and author, and shown in chronological order next to status changes. The latest note is visible in the list (F-17). Nobody types the date by hand or edits other people's notes.
 
-## F-05 · Extracción de datos con IA y revisión — P1
+## F-05 · AI data extraction and review — P1
 
-**Como** gestor, **quiero** que los datos se rellenen solos a partir de los documentos **para** revisar en lugar de teclear.
+**As** a case manager, **I want** data to be filled in from the documents **so that** I review instead of typing.
 
-Criterios de aceptación:
+Acceptance criteria:
 
-- Al subir un documento, el worker lo clasifica por tipo y extrae los campos que la ficha asocia a ese tipo.
-- Cada campo extraído guarda su valor, el documento de origen y un nivel de confianza.
-- La pantalla de revisión muestra el documento junto a los campos, con los dudosos destacados.
-- Ningún dato extraído se considera válido hasta que una persona lo confirma.
-- Si la extracción falla, el documento queda marcado para entrada manual, sin bloquear el expediente.
-- **Plan B si se recorta:** formulario de entrada manual con el documento visible al lado.
+- When a document is uploaded, the worker classifies it by type and extracts the fields the measure links to that type.
+- Each extracted field stores its value, the source document and a confidence level.
+- The review screen shows the document next to the fields, with doubtful ones highlighted.
+- No extracted value is considered valid until a person confirms it.
+- If extraction fails, the document is flagged for manual entry without blocking the case.
+- **Plan B if cut:** manual entry form with the document visible alongside.
 
-## F-06 · Portal de subida y normalización de documentos — P0
+## F-06 · Upload portal and document normalization — P0
 
-**Como** beneficiario, **quiero** subir mis documentos desde el móvil **para** no tener que enviarlos por email.
+**As** a beneficiary, **I want** to upload my documents from my phone **so that** I do not have to send them by email.
 
-Criterios de aceptación:
+Acceptance criteria:
 
-- El portal muestra qué documentos faltan, en lenguaje claro.
-- Acepta PDF, JPG, PNG y HEIC, incluidas fotos de móvil.
-- Cada archivo se convierte a PDF, se renombra según la convención y se comprime por debajo del límite configurado (10 MB por defecto).
-- Se conserva el original junto a la versión normalizada.
-- El equipo también puede subir documentos desde la ficha del expediente.
-- Los documentos se guardan en un bucket privado y solo se sirven mediante enlaces temporales.
+- The portal shows which documents are missing, in plain language.
+- Accepts PDF, JPG, PNG and HEIC, including phone photos.
+- Each file is converted to PDF, renamed according to the convention and compressed below the configured limit (10 MB by default).
+- The original is kept alongside the normalized version.
+- The team can also upload documents from the case screen.
+- Documents are stored in a private bucket and only served through temporary links.
 
-## F-07 · Comparador de versiones de ficha — P1
+## F-07 · Measure version comparator — P1
 
-**Como** gestor, **quiero** ver el ahorro de un expediente con la versión anterior y la vigente de la ficha **para** elegir la más favorable para el beneficiario.
+**As** a case manager, **I want** to see a case's savings with the previous and the current version of the measure **so that** I can pick the most favorable one for the beneficiary.
 
-Criterios de aceptación:
+Acceptance criteria:
 
-- Para un expediente, muestra lado a lado el ahorro y la remuneración estimada con cada versión aplicable.
-- Indica qué datos o documentos adicionales requiere cada versión.
-- Cambiar la versión del expediente queda registrado como evento.
+- For a case, shows side by side the savings and estimated payout with each applicable version.
+- Shows which additional data or documents each version requires.
+- Changing the case's version is recorded as an event.
 
-## F-08 · Checklist documental — P0
+## F-08 · Document checklist — P0
 
-**Como** gestor, **quiero** saber de un vistazo qué falta en cada expediente **para** pedirlo al beneficiario cuanto antes.
+**As** a case manager, **I want** to see at a glance what is missing in each case **so that** I can request it from the beneficiary as soon as possible.
 
-Criterios de aceptación:
+Acceptance criteria:
 
-- La checklist se genera a partir de los documentos requeridos por la ficha, incluidos los condicionales.
-- Cada documento tiene estado: pendiente, subido, validado o rechazado (con motivo).
-- Desde la checklist se puede enviar al beneficiario un email con lo que falta y su enlace al portal.
-- El expediente solo puede pasar a "completo" con todos los obligatorios validados.
+- The checklist is built from the documents the measure requires, including conditional ones.
+- Each document has a status: pending, uploaded, validated or rejected (with a reason).
+- From the checklist, an email listing what is missing and the portal link can be sent to the beneficiary.
+- A case can only move to "complete" when every required document is validated.
 
-## F-09 · Generación de documentos con plantillas — P0
+## F-09 · Document generation from templates — P0
 
-**Como** gestor, **quiero** generar el acuerdo de cesión y la declaración responsable con un clic **para** no editar plantillas a mano.
+**As** a case manager, **I want** to generate the savings assignment agreement and the responsible declaration in one click **so that** I do not edit templates by hand.
 
-Criterios de aceptación:
+Acceptance criteria:
 
-- Las plantillas son archivos Word con variables, versionados con la ficha.
-- Las cláusulas opcionales se activan con casillas al generar el documento, sin editar la plantilla.
-- El documento generado se guarda en el expediente en PDF, con la plantilla, la versión y las opciones usadas.
-- Si falta algún dato obligatorio para la plantilla, la generación se bloquea y se indica qué falta.
-- Solo administradores pueden modificar plantillas.
+- Templates are Word files with variables, versioned with the measure.
+- Optional clauses are switched on with checkboxes when generating, without editing the template.
+- The generated document is stored in the case as a PDF, with the template, version and options used.
+- If data required by the template is missing, generation is blocked and the missing data is listed.
+- Only admins can change templates.
 
-## F-10 · Lotes — P0
+## F-10 · Batches — P0
 
-**Como** responsable de verificación, **quiero** que el sistema me proponga lotes **para** no calcularlos a mano.
+**As** the person in charge of verification, **I want** the system to propose batches **so that** I do not calculate them by hand.
 
-Criterios de aceptación:
+Acceptance criteria:
 
-- Vista de expedientes completos agrupados por las claves de la ficha (comunidad autónoma y año), con el ahorro acumulado frente al mínimo.
-- Indica también los expedientes casi completos que podrían sumarse a cada grupo.
-- Crear un lote a partir de una propuesta o seleccionando expedientes manualmente.
-- No se puede pasar el lote a "preparado" si no alcanza el mínimo o mezcla claves incompatibles.
-- Se pueden añadir o retirar expedientes mientras el lote no se haya enviado.
-- El lote registra verificador, fechas de envío y respuesta.
+- View of complete cases grouped by the measure's keys (region and year), with the accumulated savings against the minimum.
+- Also shows almost-complete cases that could join each group.
+- Create a batch from a proposal or by selecting cases manually.
+- A batch cannot move to "ready" if it does not reach the minimum or mixes incompatible keys.
+- Cases can be added or removed until the batch has been sent.
+- The batch records the verifier and the dates sent and answered.
 
-## F-11 · Paquetes de verificación y emisión — P0
+## F-11 · Verification and issuance packages — P0
 
-**Como** responsable de verificación, **quiero** generar el paquete de un lote con un clic **para** evitar rechazos por formato.
+**As** the person in charge of verification, **I want** to generate a batch's package in one click **so that** I avoid rejections because of format.
 
-Criterios de aceptación:
+Acceptance criteria:
 
-- Genera el ZIP con la estructura de carpetas, la nomenclatura y los anexos que exige la ficha.
-- Valida nombres (caracteres no permitidos, longitud) y tamaños antes de generarlo, con un informe de errores.
-- Genera el convenio o documento agrupado del lote a partir de su plantilla.
-- Paquetes distintos para verificación y para emisión.
-- Cada paquete generado queda guardado y asociado al lote, con su fecha.
+- Generates the ZIP with the folder structure, naming and annexes the measure requires.
+- Validates names (forbidden characters, length) and sizes before generating it, with an error report.
+- Generates the batch's agreement or summary document from its template.
+- Separate packages for verification and for issuance.
+- Each generated package is stored and linked to the batch, with its date.
 
-## F-12 · Tareas y subsanaciones — P0
+## F-12 · Tasks and correction requests — P0
 
-**Como** responsable de verificación, **quiero** registrar cada requerimiento como una tarea asignada a gestión **para** que nada se pierda entre departamentos.
+**As** the person in charge of verification, **I want** to log each correction request as a task assigned to case management **so that** nothing gets lost between teams.
 
-Criterios de aceptación:
+Acceptance criteria:
 
-- Una tarea se vincula a un expediente o a un lote.
-- Campos: descripción, origen (previsión, verificador, gestor autonómico), responsable, prioridad y fecha límite.
-- Las tareas del gestor autonómico tienen prioridad máxima por defecto.
-- Un lote o expediente con tareas abiertas lo muestra claramente.
-- Vista "mis tareas" para cada usuario, ordenada por prioridad y vencimiento.
-- Completar una tarea queda registrado en el historial.
+- A task is linked to a case or a batch.
+- Fields: description, origin (preventive, verifier, regional authority), assignee, priority and due date.
+- Tasks from the regional authority get the highest priority by default.
+- A batch or case with open tasks shows it clearly.
+- "My tasks" view for each user, ordered by priority and due date.
+- Completing a task is recorded in the history.
 
-## F-13 · Semáforo de atascos — P0
+## F-13 · Stalled-items traffic light — P0
 
-**Como** dirección, **quiero** ver lo que lleva demasiado tiempo parado **para** actuar sobre lo más urgente.
+**As** a director, **I want** to see what has been idle for too long **so that** I can act on the most urgent items.
 
-Criterios de aceptación:
+Acceptance criteria:
 
-- Lista de expedientes y lotes ordenada por días sin cambio de estado, con colores según umbrales configurables por estado.
-- Filtros por responsable, estado, comunidad autónoma y verificador.
-- Los estados que dependen de terceros (por ejemplo, en emisión) se distinguen de los que dependen del equipo.
-- Se calcula automáticamente a partir de los eventos, sin entrada manual.
+- List of cases and batches ordered by days without a status change, colored by thresholds configurable per status.
+- Filters by assignee, status, region and verifier.
+- Statuses that depend on third parties (for example, in issuance) are distinguished from those that depend on the team.
+- Calculated automatically from events, with no manual entry.
 
-## F-14 · KPIs y objetivos por persona — P1
+## F-14 · KPIs and objectives per person — P1
 
-**Como** dirección, **quiero** ver el avance de cada persona frente a su objetivo mensual **para** gestionar bonificaciones sin hojas aparte.
+**As** a director, **I want** to see each person's progress against their monthly objective **so that** I can manage bonuses without separate spreadsheets.
 
-Criterios de aceptación:
+Acceptance criteria:
 
-- Objetivos mensuales configurables por usuario y métrica (por ejemplo, expedientes con dictamen favorable, expedientes emitidos, solicitudes de verificación).
-- Avance calculado a partir de los eventos, con proyección a fin de mes.
-- Cada usuario ve sus propios KPIs; dirección ve los de todos.
-- Exportación a CSV.
+- Monthly objectives configurable per user and metric (for example, cases with a favorable opinion, cases issued, verification requests).
+- Progress calculated from events, with an end-of-month projection.
+- Each user sees their own KPIs; directors see everyone's.
+- CSV export.
 
-## F-15 · Importación de datos actuales — P0
+## F-15 · Case import — P0
 
-**Como** administrador, **quiero** importar los expedientes y lotes existentes **para** empezar a usar Certia sin perder historial.
+**As** the admin of a new organization, **I want** to import my existing cases and batches **so that** I can start using Certia without losing history.
 
-Criterios de aceptación:
+Acceptance criteria:
 
-- Importación desde exportaciones CSV de las hojas y de la base de datos actuales.
-- Mapeo configurable de columnas y de estados antiguos a estados nuevos.
-- Modo simulación que muestra un informe de lo que se importaría y los errores, sin escribir nada.
-- Importación idempotente: repetirla no duplica registros.
-- Importación de documentos existentes desde las carpetas de Drive, asociándolos a su expediente.
+- Import from CSV or Excel files exported from the customer's current tools.
+- Configurable mapping of columns and of old statuses to new ones.
+- Dry-run mode showing a report of what would be imported and the errors, without writing anything.
+- Idempotent import: running it again does not duplicate records.
+- Import of existing documents from a ZIP file or a folder, linked to their case.
 
-## F-16 · Cifrado de datos sensibles — P0
+## F-16 · Encryption of sensitive data — P0
 
-**Como** responsable de protección de datos, **quiero** que el DNI y los datos bancarios estén cifrados **para** limitar el impacto de cualquier fuga.
+**As** the data protection officer, **I want** ID numbers and bank details to be encrypted **so that** the impact of any leak is limited.
 
-Criterios de aceptación:
+Acceptance criteria:
 
-- DNI, IBAN y titular de la cuenta se cifran antes de guardarse; la clave no está en la base de datos.
-- Para buscar por DNI se usa un hash, nunca el valor en claro.
-- Solo los roles autorizados ven los valores descifrados, y cada consulta queda registrada.
-- Los datos sensibles nunca aparecen en logs ni en mensajes de error.
-- Documentos de identidad solo accesibles con enlaces temporales.
+- ID numbers, IBANs and account holders are encrypted before being stored; the key is not in the database.
+- Searching by ID number uses a hash, never the plain value.
+- Only authorized roles see decrypted values, and every access is recorded.
+- Sensitive data never appears in logs or error messages.
+- Identity documents are only accessible through temporary links.
 
-## F-17 · Búsqueda y listados filtrables — P0
+## F-17 · Search and filterable lists — P0
 
-**Como** usuario, **quiero** encontrar cualquier expediente o lote rápidamente **para** dejar de buscar en hojas de cálculo.
+**As** a user, **I want** to find any case or batch quickly **so that** I stop searching through spreadsheets.
 
-Criterios de aceptación:
+Acceptance criteria:
 
-- Búsqueda por nombre, DNI (exacto), matrícula, referencia de expediente o de lote.
-- Listados con filtros por estado, responsable, ficha, comunidad autónoma, año y lote.
-- Los filtros se pueden guardar como vistas personales.
-- Exportación del listado filtrado a CSV.
+- Search by name, ID number (exact), plate number, case or batch reference.
+- Lists filtered by status, assignee, measure, region, year and batch.
+- Filters can be saved as personal views.
+- Export of the filtered list to CSV.
 
 ---
 
-## Fase 2 (fuera del MVP)
+## Phase 2 (out of the MVP)
 
-| ID | Funcionalidad | Nota |
+| ID | Feature | Note |
 |---|---|---|
-| F-20 | Pagos a beneficiarios | Validación de titularidad, control de duplicados, estados de pago por lote. **Primera prioridad tras el MVP.** |
-| F-21 | Remesas SEPA de pago | Fichero de remesa para el banco a partir de los pagos aprobados |
-| F-22 | Venta y facturación de CAE | Compradores, contratos, facturas |
-| F-23 | Conexión contable o ERP | A definir según el sistema del cliente |
-| F-24 | Nuevas fichas | Aerotermia como segunda ficha para validar la abstracción del motor |
-| F-25 | Editor visual de fichas | Solo si el volumen de cambios lo justifica |
-| F-26 | Recordatorios automáticos a verificadores | Sobre la base del semáforo (F-13) |
-| F-27 | WhatsApp y llamadas desde el expediente | Integración con proveedor a elegir |
-| F-28 | Portal para verificadores | Descarga directa de paquetes con acceso controlado |
-| F-29 | Firma electrónica | Solo en los supuestos que admita la normativa |
-| F-30 | Multiempresa comercial | Alta de nuevas organizaciones y facturación del servicio |
+| F-18 | Self-service organization sign-up | Registration, domain verification and first admin without the Certia team |
+| F-19 | Subscription and service billing | Plans, invoices with VAT and recurring payment |
+| F-20 | Payments to beneficiaries | Account holder validation, duplicate checks, payment status per batch |
+| F-21 | SEPA payment remittances | Remittance file for the bank from approved payments |
+| F-22 | CAE sales and invoicing | Buyers, contracts, invoices |
+| F-23 | Accounting or ERP integration | Depends on each customer's system |
+| F-24 | New measures | Prioritized by demand; the second one very different from the first to validate the engine |
+| F-25 | Visual measure editor | Only if the volume of changes justifies it |
+| F-26 | Automatic reminders to verifiers | Built on the traffic light (F-13) |
+| F-27 | WhatsApp and calls from the case | Integration with a provider to be chosen |
+| F-28 | Verifier portal | Direct package download with controlled access |
+| F-29 | Electronic signature | Only where regulation allows it |
+| F-30 | External lead capture forms | Forms on the customer's website (WordPress or others) send leads to Certia through an embeddable form or an endpoint with a key per organization |
+| F-31 | Temporary spreadsheet sync | During the transition, read from and write to the customer's current spreadsheet (Google Sheets) to coexist with it until it is retired |
+| F-32 | Document inbox | One email address per organization: documents received by email are linked to the case by reference or sender |
+| F-33 | Email from the customer's account | Send emails to beneficiaries from the customer's own mailbox (Google or Microsoft) through its API, without storing passwords |
+| F-34 | Case agent | Workflow with AI steps that moves each case forward and proposes; a person confirms. Details below |
+| F-35 | Knowledge base with RAG | Shared regulation with citations and per-organization memory of correction requests. Details below |
+
+### F-34 · Case agent
+
+**As** a case manager, **I want** each case to be reviewed automatically when documents arrive **so that** I spend my time confirming and handling exceptions, not typing.
+
+Built in phases:
+
+1. **Automatic review** (extends F-05): when a document arrives, through the portal or by email (F-32), it is classified, the measure's fields are extracted and documents are cross-checked (same owner, same tax ID, same plate number, dates within deadlines). Savings and the checklist are recalculated.
+2. **Proposed next step**: if something is missing or inconsistent, it drafts the request to the beneficiary; if everything is in place, it proposes moving the case to "complete".
+3. **Correction requests**: it reads requests from verifiers and regional authorities, creates the tasks (F-12) and proposes which document or answer addresses each one, drawing on F-35.
+
+Acceptance criteria:
+
+- It is a defined workflow with AI steps, run by the worker; not a free agent that decides what to do.
+- The agent **proposes and a person confirms**: it does not send emails, change critical statuses or send packages without approval.
+- Each proposal stores its origin, confidence and justification; who approved or corrected it is recorded in the history (F-02).
+- The agent's tools are Certia functions (read the case and documents, calculate, check the checklist, create a proposal, draft an email), always limited to the case's organization.
+- What to extract and what to validate comes from the measure: a new measure does not require reprogramming the agent.
+- AI provider deployed in the EU, with a contract that forbids using the data for training.
+
+### F-35 · Knowledge base with RAG
+
+**As** a case manager, **I want** to ask regulatory questions and see how similar cases were resolved **so that** I can decide quickly and on solid grounds.
+
+Two separate spaces:
+
+1. **Shared regulation**: Royal Decree 36/2023, the catalog of measures with all their versions, each region's procedures, official FAQs and criteria published by verifiers. Public sources only.
+2. **Each organization's memory**: correction requests received and how they were resolved, visible only to that organization.
+
+Acceptance criteria:
+
+- In-app assistant that **always answers with a citation** (document and section); if there is no source, it says so instead of making something up.
+- Regulation is versioned by date: a question about a case uses the rules in force on its date.
+- Change alerts when a new version of a measure or procedure is published.
+- Indexes in Postgres with pgvector, in the same database; each organization's memory is always filtered by `organization_id`.
+- No personal data in the indexes: from correction requests, the content is indexed, never names, ID numbers or addresses.
+- The savings calculation **never** depends on RAG: it is always done by the measure engine (F-03).

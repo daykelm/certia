@@ -16,7 +16,7 @@
     "db:generate": "pnpm --filter @certia/db generate",
     "db:migrate": "pnpm --filter @certia/db migrate",
     "db:seed": "pnpm --filter @certia/db seed",
-    "fichas:check": "pnpm --filter @certia/fichas check"
+    "measures:check": "pnpm --filter @certia/measures check"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.0",

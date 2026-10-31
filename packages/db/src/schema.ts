@@ -20,7 +20,7 @@ import {
  *
  * Conventions:
  * - Every business table has organization_id (decision D10).
- * - Ficha-specific data lives in `data` (JSONB) and is validated against the ficha.
+ * - Measure-specific data lives in `data` (JSONB) and is validated against the measure.
  * - *_encrypted columns hold values encrypted at the application level (F-16).
  * - Every relevant change is recorded in `events` (F-02).
  */
@@ -100,9 +100,9 @@ export const leads = pgTable(
   (t) => [index("leads_org_status_idx").on(t.organizationId, t.status)],
 );
 
-/** Published copy of each ficha version. Immutable (decision D3). */
-export const fichaVersions = pgTable(
-  "ficha_versions",
+/** Published copy of each measure version. Immutable (decision D3). */
+export const measureVersions = pgTable(
+  "measure_versions",
   {
     id: id(),
     code: text("code").notNull(),
@@ -112,11 +112,11 @@ export const fichaVersions = pgTable(
     definition: jsonb("definition").notNull(),
     publishedAt: timestamp("published_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [uniqueIndex("ficha_versions_code_version_uq").on(t.code, t.version)],
+  (t) => [uniqueIndex("measure_versions_code_version_uq").on(t.code, t.version)],
 );
 
-export const expedientes = pgTable(
-  "expedientes",
+export const cases = pgTable(
+  "cases",
   {
     id: id(),
     organizationId: org(),
@@ -125,8 +125,8 @@ export const expedientes = pgTable(
       .notNull()
       .references(() => contacts.id),
     leadId: uuid("lead_id").references(() => leads.id),
-    fichaCode: text("ficha_code").notNull(),
-    fichaVersion: integer("ficha_version").notNull(),
+    measureCode: text("measure_code").notNull(),
+    measureVersion: integer("measure_version").notNull(),
     status: text("status").notNull().default("lead"),
     /** Time of the last status change: drives the traffic light (F-13). */
     statusSince: timestamp("status_since", { withTimezone: true }).notNull().defaultNow(),
@@ -140,9 +140,9 @@ export const expedientes = pgTable(
     updatedAt: updatedAt(),
   },
   (t) => [
-    uniqueIndex("expedientes_org_reference_uq").on(t.organizationId, t.reference),
-    index("expedientes_org_status_idx").on(t.organizationId, t.status, t.statusSince),
-    index("expedientes_grouping_idx").on(t.organizationId, t.fichaCode, t.region, t.year),
+    uniqueIndex("cases_org_reference_uq").on(t.organizationId, t.reference),
+    index("cases_org_status_idx").on(t.organizationId, t.status, t.statusSince),
+    index("cases_grouping_idx").on(t.organizationId, t.measureCode, t.region, t.year),
   ],
 );
 
@@ -151,9 +151,9 @@ export const documents = pgTable(
   {
     id: id(),
     organizationId: org(),
-    expedienteId: uuid("expediente_id")
+    caseId: uuid("case_id")
       .notNull()
-      .references(() => expedientes.id),
+      .references(() => cases.id),
     type: text("type").notNull(),
     status: text("status").notNull().default("uploaded"),
     originalName: text("original_name").notNull(),
@@ -169,30 +169,30 @@ export const documents = pgTable(
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
-  (t) => [index("documents_expediente_idx").on(t.expedienteId, t.type)],
+  (t) => [index("documents_case_idx").on(t.caseId, t.type)],
 );
 
 export const generatedDocuments = pgTable("generated_documents", {
   id: id(),
   organizationId: org(),
-  expedienteId: uuid("expediente_id").references(() => expedientes.id),
-  loteId: uuid("lote_id").references(() => lotes.id),
+  caseId: uuid("case_id").references(() => cases.id),
+  batchId: uuid("batch_id").references(() => batches.id),
   templateId: text("template_id").notNull(),
-  fichaCode: text("ficha_code").notNull(),
-  fichaVersion: integer("ficha_version").notNull(),
+  measureCode: text("measure_code").notNull(),
+  measureVersion: integer("measure_version").notNull(),
   options: jsonb("options").$type<Record<string, unknown>>().notNull().default({}),
   path: text("path").notNull(),
   createdBy: uuid("created_by").references(() => users.id),
   createdAt: createdAt(),
 });
 
-export const lotes = pgTable(
-  "lotes",
+export const batches = pgTable(
+  "batches",
   {
     id: id(),
     organizationId: org(),
     reference: text("reference").notNull(),
-    fichaCode: text("ficha_code").notNull(),
+    measureCode: text("measure_code").notNull(),
     /** Grouping key values, e.g. { region, year }. */
     key: jsonb("key").$type<Record<string, string>>().notNull(),
     status: text("status").notNull().default("draft"),
@@ -204,26 +204,26 @@ export const lotes = pgTable(
     updatedAt: updatedAt(),
   },
   (t) => [
-    uniqueIndex("lotes_org_reference_uq").on(t.organizationId, t.reference),
-    index("lotes_org_status_idx").on(t.organizationId, t.status, t.statusSince),
+    uniqueIndex("batches_org_reference_uq").on(t.organizationId, t.reference),
+    index("batches_org_status_idx").on(t.organizationId, t.status, t.statusSince),
   ],
 );
 
-export const loteExpedientes = pgTable(
-  "lote_expedientes",
+export const batchCases = pgTable(
+  "batch_cases",
   {
-    loteId: uuid("lote_id")
+    batchId: uuid("batch_id")
       .notNull()
-      .references(() => lotes.id, { onDelete: "cascade" }),
-    expedienteId: uuid("expediente_id")
+      .references(() => batches.id, { onDelete: "cascade" }),
+    caseId: uuid("case_id")
       .notNull()
-      .references(() => expedientes.id),
+      .references(() => cases.id),
     createdAt: createdAt(),
   },
   (t) => [
-    primaryKey({ columns: [t.loteId, t.expedienteId] }),
-    // An expediente can only belong to one lote.
-    uniqueIndex("lote_expedientes_expediente_uq").on(t.expedienteId),
+    primaryKey({ columns: [t.batchId, t.caseId] }),
+    // A case can only belong to one batch.
+    uniqueIndex("batch_cases_case_uq").on(t.caseId),
   ],
 );
 
@@ -232,8 +232,8 @@ export const tasks = pgTable(
   {
     id: id(),
     organizationId: org(),
-    expedienteId: uuid("expediente_id").references(() => expedientes.id),
-    loteId: uuid("lote_id").references(() => lotes.id),
+    caseId: uuid("case_id").references(() => cases.id),
+    batchId: uuid("batch_id").references(() => batches.id),
     title: text("title").notNull(),
     description: text("description"),
     origin: text("origin").notNull().default("internal"),

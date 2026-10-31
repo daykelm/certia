@@ -1,4 +1,4 @@
-import type { Packaging } from "../ficha/schema.js";
+import type { Packaging } from "../measure/schema.js";
 
 /**
  * File names and sizes for the verification and issuance packages (F-06, F-11).
@@ -34,20 +34,20 @@ export interface PackageFile {
   bytes: number;
 }
 
-/** Returns the file's list of problems (user-facing, Spanish); empty when valid. */
+/** Returns the file's list of problems; empty when valid. */
 export function validateFile(file: PackageFile, rules: Packaging): string[] {
   const errors: string[] = [];
   const fullName = `${file.name}.${file.extension}`;
 
   const forbidden = [...new Set([...file.name].filter((ch) => rules.forbidden_chars.includes(ch)))];
-  if (forbidden.length > 0) errors.push(`${fullName}: contiene caracteres no permitidos (${forbidden.join(" ")})`);
-  if (/\s/.test(file.name)) errors.push(`${fullName}: contiene espacios`);
+  if (forbidden.length > 0) errors.push(`${fullName}: contains forbidden characters (${forbidden.join(" ")})`);
+  if (/\s/.test(file.name)) errors.push(`${fullName}: contains spaces`);
   if (fullName.length > rules.max_name_length) {
-    errors.push(`${fullName}: el nombre supera ${rules.max_name_length} caracteres`);
+    errors.push(`${fullName}: name is longer than ${rules.max_name_length} characters`);
   }
   if (file.bytes > rules.max_size_mb * 1024 * 1024) {
     const mb = (file.bytes / 1024 / 1024).toFixed(1);
-    errors.push(`${fullName}: pesa ${mb} MB y el máximo es ${rules.max_size_mb} MB`);
+    errors.push(`${fullName}: is ${mb} MB and the maximum is ${rules.max_size_mb} MB`);
   }
   return errors;
 }

@@ -7,7 +7,7 @@ import * as schema from "./schema.js";
 
 export * as schema from "./schema.js";
 export * from "./schema.js";
-export { syncFichas } from "./sync-fichas.js";
+export { syncMeasures } from "./sync-measures.js";
 
 export type Db = NodePgDatabase<typeof schema>;
 /** Database or transaction: both can be written to. */
@@ -36,7 +36,7 @@ export async function runMigrations(url = process.env.DATABASE_URL) {
 
 export interface NewEvent {
   organizationId: string;
-  entity: "expediente" | "lote" | "document" | "task" | "contact" | "lead" | "user";
+  entity: "case" | "batch" | "document" | "task" | "contact" | "lead" | "user";
   entityId: string;
   type: string;
   actorId?: string | null;

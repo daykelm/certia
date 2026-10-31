@@ -1,6 +1,6 @@
 import { createAdapters } from "@certia/adapters";
 import { createDb } from "@certia/db";
-import { loadCatalog } from "@certia/fichas";
+import { loadCatalog } from "@certia/measures";
 import { buildApp } from "./app.js";
 import { config } from "./config.js";
 

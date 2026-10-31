@@ -1,9 +1,9 @@
 {
-  "name": "@certia/fichas",
+  "name": "@certia/measures",
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Ficha definitions (YAML) and catalog.",
+  "description": "Measure definitions (YAML) and catalog.",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {

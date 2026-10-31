@@ -1,0 +1,93 @@
+# ⚠️ SAMPLE TEMPLATE — illustrative values.
+# Replace factors, formula and documents with those of the official ficha.
+# Illustrates a new version that adds parameters (scrappage) and a conditional document.
+code: TRA-VE
+version: 2
+name: Electric vehicle (current version)
+description: Replacement or purchase of an electric vehicle.
+validity:
+  from: "2026-01-01"
+
+fields:
+  - id: vehicle_type
+    label: Vehicle category
+    type: enum
+    options: [M1, N1]
+    source: document:technical_sheet
+  - id: plate_number
+    label: Plate number
+    type: text
+    source: document:vehicle_registration
+  - id: registration_date
+    label: Registration date
+    type: date
+    source: document:vehicle_registration
+  - id: scrapped_vehicle
+    label: Was a combustion vehicle scrapped?
+    type: boolean
+  - id: annual_km
+    label: Estimated annual distance
+    type: integer
+    unit: km
+    min: 0
+    max: 100000
+    required: false
+
+constants:
+  annual_savings_kwh:
+    M1: 600
+    N1: 900
+  lifetime_years: 10
+  scrappage_factor: 1.15
+
+calculation:
+  formula: "annual_savings_kwh[vehicle_type] * lifetime_years * (scrapped_vehicle ? scrappage_factor : 1)"
+
+tests:
+  - description: Passenger car (M1) without scrappage
+    input: { vehicle_type: M1, plate_number: "0000AAA", registration_date: "2026-02-10", scrapped_vehicle: false }
+    expected_kwh: 6000
+  - description: Passenger car (M1) with scrappage
+    input: { vehicle_type: M1, plate_number: "0000AAA", registration_date: "2026-02-10", scrapped_vehicle: true }
+    expected_kwh: 6900
+
+documents:
+  - type: id_document
+    label: Owner's ID document
+  - type: vehicle_registration
+    label: Vehicle registration certificate
+    extract: [plate_number, registration_date]
+  - type: technical_sheet
+    label: Vehicle technical sheet
+    extract: [vehicle_type]
+  - type: purchase_invoice
+    label: Purchase invoice
+  - type: deregistration_certificate
+    label: Deregistration certificate of the scrapped vehicle
+    condition: scrapped_vehicle
+  - type: assignment_agreement
+    label: Savings assignment agreement
+    generated: true
+  - type: responsible_declaration
+    label: Responsible declaration
+    generated: true
+
+grouping:
+  required: true
+  keys: [region, year]
+  min_kwh: 30000
+
+templates:
+  - id: assignment_agreement
+    document: assignment_agreement
+    file: templates/electric-vehicle/assignment_agreement_v2.docx
+    optional_clauses:
+      - id: transitional_clause
+        label: Transitional clause
+  - id: responsible_declaration
+    document: responsible_declaration
+    file: templates/electric-vehicle/responsible_declaration_v2.docx
+
+packaging:
+  max_size_mb: 10
+  name_pattern: "{reference}_{type}"
