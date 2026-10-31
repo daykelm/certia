@@ -144,6 +144,7 @@ Acceptance criteria:
 - The generated document is stored in the case as a PDF, with the template, version and options used.
 - If data required by the template is missing, generation is blocked and the missing data is listed.
 - Only admins can change templates.
+- **Signing (wet signature) in the MVP**: a generated document can be sent to the beneficiary to print, sign by hand and upload through the portal (F-06). Each document has a signature status: not sent, sent, signed, rejected. The signed copy is stored next to the generated one, and the checklist (F-08) only counts the document as done once the signed copy is validated. Electronic signature comes with F-29.
 
 ## F-10 · Batches — P0
 
@@ -257,7 +258,7 @@ Acceptance criteria:
 | F-26 | Automatic reminders to verifiers | Built on the traffic light (F-13) |
 | F-27 | WhatsApp and calls from the case | Integration with a provider to be chosen |
 | F-28 | Verifier portal | Direct package download with controlled access |
-| F-29 | Electronic signature | Only where regulation allows it |
+| F-29 | Electronic and wet signature | Send generated documents for e-signature through a provider, alongside the wet-signature flow from F-09. Details below |
 | F-30 | External lead capture forms | Forms on the customer's website (WordPress or others) send leads to Certia through an embeddable form or an endpoint with a key per organization |
 | F-31 | Temporary spreadsheet sync | During the transition, read from and write to the customer's current spreadsheet (Google Sheets) to coexist with it until it is retired |
 | F-32 | Document inbox | One email address per organization: documents received by email are linked to the case by reference or sender |
@@ -289,6 +290,27 @@ Acceptance criteria:
 - Amounts in euros with two decimals; VAT rates configurable.
 - Invoices meet Spanish invoicing requirements; compliance with current e-invoicing rules (such as Verifactu) is checked with an advisor before building.
 - Payment details (IBAN, account holder) stay encrypted (F-16) and only go to accounting or the bank when strictly needed.
+
+### F-29 · Electronic and wet signature
+
+**As** a case manager, **I want** beneficiaries to sign the savings assignment agreement and the responsible declaration from their phone **so that** cases are not held up waiting for printed, scanned paperwork.
+
+Two ways to sign, chosen per document and per beneficiary:
+
+1. **Wet signature** (already in the MVP through F-09): download, print, sign by hand, upload a scan or photo through the portal. Kept for beneficiaries who prefer paper or documents where an electronic signature is not accepted.
+2. **Electronic signature** through a signature provider: the beneficiary receives a link, reviews the document and signs on screen, with identity checks according to the level required.
+
+Acceptance criteria:
+
+- One action sends one or several generated documents (for example agreement + declaration) for signature in a single envelope.
+- Signature level configurable per document type: simple, advanced or qualified electronic signature (eIDAS). Which level verifiers and each regional authority accept is confirmed before go-live and stored in the measure (or organization) configuration.
+- Status tracked per document and per signer: sent, viewed, signed, declined, expired; updates arrive by webhook and are recorded as events (F-02).
+- Automatic reminders before the signing link expires; the case manager can resend or switch to wet signature at any time.
+- The signed PDF and the provider's audit trail (evidence certificate) are stored with the case and included in verification and issuance packages when required (F-11).
+- A signed document is never regenerated: changes create a new version that must be signed again.
+- Wet-signed uploads are checked for a visible signature on every required page before validation (manual review in the MVP, AI check later with F-34).
+- Provider behind an adapter, so it can be changed (candidates to evaluate: Signaturit, Validated ID, DocuSign, Adobe Acrobat Sign); data processed in the EU.
+- Sending for signature costs money per envelope: the cost is shown before sending and reported per organization.
 
 ### F-34 · Case agent
 
