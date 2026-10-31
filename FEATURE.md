@@ -114,13 +114,18 @@ Acceptance criteria:
 
 ## F-07 · Measure version comparator — P1
 
-**As** a case manager, **I want** to see a case's savings with the previous and the current version of the measure **so that** I can pick the most favorable one for the beneficiary.
+**As** a case manager, **I want** to see a case's savings and payout with the previous and the current version of the measure **so that** I can pick the most favorable one for the beneficiary.
 
 Acceptance criteria:
 
-- For a case, shows side by side the savings and estimated payout with each applicable version.
-- Shows which additional data or documents each version requires.
+- On the case page, next to the measure data, a visual comparison shows every version of the measure: savings (kWh), payout (€) and a bar per version scaled to the payout.
+- Payout = savings × price per kWh. The price is entered on screen (and later defaults to an organization setting); without a price, versions are compared in kWh only.
+- The baseline is the version the case uses today (the oldest version in the standalone calculator). Each other version shows its difference against the baseline in € and %.
+- The most favorable version is highlighted, with a summary such as "Switching from v1 to v2 gives +€120.00 (+20 %)".
+- Versions that cannot be calculated with the current data stay visible, with the reasons (for example, a field the new version requires).
+- Shows which additional documents each version requires.
 - Changing the case's version is recorded as an event.
+- API: `POST /api/measures/:code/compare` (data, price, optional baseline) and `GET /api/cases/:id/comparison?pricePerKwh=`.
 
 ## F-08 · Document checklist — P0
 

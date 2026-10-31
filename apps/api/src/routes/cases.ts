@@ -1,11 +1,12 @@
 import { randomBytes } from "node:crypto";
 import type { FastifyInstance } from "fastify";
 import { and, asc, desc, eq } from "drizzle-orm";
-import { buildChecklist, calculateSavings, canTransition, type Measure } from "@certia/core";
+import { buildChecklist, calculateSavings, canTransition, compareVersions, type Measure } from "@certia/core";
 import { cases, contacts, documents, events, recordEvent } from "@certia/db";
 import {
   CaseStatusSchema,
   CreateCaseSchema,
+  PricePerKwhSchema,
   TransitionSchema,
   type CaseStatus,
   type DocumentStatus,
@@ -139,6 +140,17 @@ export async function caseRoutes(app: FastifyInstance, { db, catalog }: Services
       calculation: calculateSavings(measure, c.data),
       history,
     };
+  });
+
+  /**
+   * Compares the case's data with every version of its measure, in kWh and euros (F-07).
+   * The baseline is the version the case uses today.
+   */
+  app.get<{ Params: { id: string } }>("/:id/comparison", async (req) => {
+    const u = currentUser(req);
+    const { pricePerKwh } = z.object({ pricePerKwh: PricePerKwhSchema.optional() }).parse(req.query);
+    const { c } = await load(req.params.id, u.organizationId);
+    return compareVersions(catalog.versions(c.measureCode), c.data, { pricePerKwh, baselineVersion: c.measureVersion });
   });
 
   /** Updates the measure data and recalculates the savings. */

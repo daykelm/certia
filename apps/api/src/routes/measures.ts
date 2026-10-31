@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { calculateSavings, compareVersions } from "@certia/core";
-import { CalculateSchema } from "@certia/shared";
+import { CalculateSchema, CompareSchema } from "@certia/shared";
 import { currentUser, HttpError, type Services } from "../context.js";
 
 export async function measureRoutes(app: FastifyInstance, { catalog }: Services) {
@@ -26,11 +26,14 @@ export async function measureRoutes(app: FastifyInstance, { catalog }: Services)
     return calculateSavings(measure, data);
   });
 
-  /** Compares every version of a measure using the same data (F-07). */
+  /** Compares every version of a measure using the same data, in kWh and euros (F-07). */
   app.post<{ Params: { code: string } }>("/:code/compare", async (req) => {
     const versions = catalog.versions(req.params.code);
     if (versions.length === 0) throw new HttpError(404, "Measure not found");
-    const { data } = CalculateSchema.parse(req.body);
-    return compareVersions(versions, data);
+    const { data, pricePerKwh, baselineVersion } = CompareSchema.parse(req.body);
+    if (baselineVersion !== undefined && !versions.some((m) => m.version === baselineVersion)) {
+      throw new HttpError(400, `Version ${baselineVersion} does not exist for this measure`);
+    }
+    return compareVersions(versions, data, { pricePerKwh, baselineVersion });
   });
 }
