@@ -9,4 +9,4 @@
 
 ## Conventions
 
-See the "Conventions" section of [README.md](./README.md): code and technical docs in English, domain terms (ficha, expediente, lote) and user-facing text in Spanish.
+Everything is in English: code, data, database, API, UI and docs. Use the glossary in [README.md](./README.md) to map English terms (measure, case, batch) to the Spanish regulation (ficha, expediente, lote). See the "Conventions" section of the README.

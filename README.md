@@ -1,24 +1,35 @@
 # Certia
 
-Multi-company SaaS for companies that manage **Energy Savings Certificate (CAE, *Certificados de Ahorro Energético*)** files in Spain (facilitators, delegated parties, installers): from capturing the beneficiary and collecting documents to building lotes, verification and issuance.
+Multi-company SaaS for companies that manage **Energy Savings Certificate (CAE, *Certificados de Ahorro Energético*)** cases in Spain (facilitators, delegated parties, installers): from capturing the beneficiary and collecting documents to building batches, verification and issuance.
 
-Certia separates a **generic engine** (expedientes, documents, workflows, lotes, tasks) from the actuación **fichas**, which are defined as configuration. Adding a new kind of actuación (electric vehicle, heat pump, building envelope, appliances…) means adding a ficha, not writing code.
+Certia separates a **generic engine** (cases, documents, workflows, batches, tasks) from the **measures**, which are defined as configuration. Adding a new kind of efficiency action (electric vehicle, heat pump, building envelope, appliances…) means adding a measure, not writing code.
 
-> Status: **MVP in progress**, to be validated with 2–3 design partners. Sample ficha: electric vehicle (illustrative values).
+> Status: **MVP in progress**, to be validated with 2–3 design partners. Sample measure: electric vehicle (illustrative values).
 >
-> Certia is built from public regulation and documentation (Real Decreto 36/2023, the Ministry's ficha catalog, regional procedures) and general sector knowledge. Never commit confidential material from third parties (client templates, data, internal documents) unless a written agreement allows it.
+> Certia is built from public regulation and documentation (Royal Decree 36/2023, the Ministry's catalog of measures, regional procedures) and general sector knowledge. Never commit confidential material from third parties (client templates, data, internal documents) unless a written agreement allows it.
 
-Project documentation (in Spanish, for the client):
+Project documentation:
 
-- [PROJECT.md](./PROJECT.md): context, goals, scope, architecture and delivery plan.
+- [PROJECT.md](./PROJECT.md): context, goals, scope, architecture, delivery plan and a glossary of Spanish regulatory terms.
 - [FEATURE.md](./FEATURE.md): MVP features with priority and acceptance criteria.
 
 ## Glossary
 
-The domain vocabulary is kept in Spanish in code and data, because it mirrors the regulation and is what users see.
+Everything in Certia is in English. These are the Spanish terms used by the regulation and the sector:
 
-| Term | Meaning |
-|---|---|
+| English | Spanish | Meaning |
+|---|---|---|
+| CAE | Certificado de Ahorro Energético | Energy savings certificate; 1 CAE = 1 kWh of final energy saved |
+| Measure | Ficha | Official catalog sheet defining how the savings of a kind of efficiency action are calculated and documented |
+| Case | Expediente | One energy efficiency action (*actuación*) and its file |
+| Batch | Lote | Group of cases sent together to verification and issuance |
+| Verifier | Verificador | ENAC-accredited body that issues the verification opinion (*dictamen*) |
+| Regional authority | Gestor autonómico | Regional body that issues the CAE |
+| Correction request | Subsanación | Correction requested by the verifier or the regional authority |
+| Savings assignment agreement | Acuerdo de cesión | Agreement by which the beneficiary assigns their savings |
+| Traffic light | Semáforo | View of stalled cases and batches |
+
+---|---|
 | CAE | Energy savings certificate; 1 CAE = 1 kWh of final energy saved |
 | Ficha | Official catalog sheet defining how the savings of a kind of actuación are calculated and documented |
 | Actuación / expediente | One energy efficiency action and its case file |
@@ -58,9 +69,9 @@ certia/
 │   ├── api/          # REST API (Fastify)
 │   └── worker/       # Background jobs: AI extraction, PDFs, alerts
 ├── packages/
-│   ├── core/         # Pure domain: fichas, calculation, workflows, lotes (no infrastructure deps)
+│   ├── core/         # Pure domain: measures, calculation, workflows, batches (no infrastructure deps)
 │   ├── db/           # Drizzle schema and migrations
-│   ├── fichas/       # YAML ficha definitions + validation
+│   ├── measures/     # YAML measure definitions + validation
 │   ├── adapters/     # Storage, queues, AI, email, PDF, encryption (interfaces + implementations)
 │   └── shared/       # Shared types and Zod schemas
 ├── docker/
@@ -89,7 +100,7 @@ cp .env.example .env                          # set ENCRYPTION_KEY with: openssl
 pnpm install
 docker compose -f docker/compose.yml up -d   # postgres and gotenberg
 pnpm db:migrate
-pnpm db:seed                                  # organization, admin user and fichas
+pnpm db:seed                                  # organization, admin user and measures
 pnpm dev                                      # api + worker + web in dev mode
 ```
 
@@ -127,7 +138,7 @@ docker compose -f docker/compose.yml --profile app up --build
 | `pnpm db:generate` | Generates a migration from the schema |
 | `pnpm db:migrate` | Applies pending migrations |
 | `pnpm db:seed` | Loads development data |
-| `pnpm fichas:check` | Validates the YAML fichas and runs their calculation test cases |
+| `pnpm measures:check` | Validates the YAML measures and runs their calculation test cases |
 
 ## Environment variables
 
@@ -172,7 +183,7 @@ Setup checklist:
 
 GitHub Actions, on every push to `main`:
 
-1. Lint, types and tests (including `fichas:check`).
+1. Lint, types, tests (including `measures:check`) and a check that migrations match the schema.
 2. Builds the image and pushes it to Artifact Registry.
 3. Applies migrations in **staging** and deploys `api` and `worker` to Cloud Run.
 4. Promotion to **production** is manual (approval in GitHub).
@@ -189,11 +200,11 @@ Google Cloud services:
 
 ## Conventions
 
-- **Language:** code (identifiers, files, database tables and columns, API routes), technical documentation, comments, commit messages and logs are in English. Domain terms that have no good English equivalent stay in Spanish (`ficha`, `expediente`, `lote`; see the glossary), as do ficha data (field ids, labels, document types) and user-facing messages.
+- **Language:** everything is in English: code, data (measure definitions), database, API, UI, documentation, commit messages and logs. The glossary maps English terms to the Spanish regulation. Spanish UI text will be added later through i18n.
 - Branches: `main` (deployable), `feat/*`, `fix/*`.
 - Commits: [Conventional Commits](https://www.conventionalcommits.org/).
-- Every new feature references its ID from [FEATURE.md](./FEATURE.md) (e.g. `feat(lotes): F-10 automatic lote proposals`).
-- Published ficha versions are immutable: a regulatory change creates a **new version**.
+- Every new feature references its ID from [FEATURE.md](./FEATURE.md) (e.g. `feat(batches): F-10 automatic batch proposals`).
+- Published measure versions are immutable: a regulatory change creates a **new version**.
 - Sensitive personal data (DNI, IBAN) is encrypted at the application level and never appears in logs.
 - Screenshots and documents from existing systems are reference only: never copy personal data from them into code, fixtures, tests or docs. Use fictitious data. See [CLAUDE.md](./CLAUDE.md).
 
