@@ -49,7 +49,6 @@ button {
 
 table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 14px; }
 th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--border); }
-tr.best td { font-weight: 600; color: var(--accent); }
 
 .warning, .errors { color: var(--red); font-size: 14px; }
 .empty { color: var(--muted); font-size: 14px; }
@@ -65,3 +64,32 @@ tr.best td { font-weight: 600; color: var(--accent); }
 .dot.red { background: var(--red); }
 .status { color: var(--muted); }
 .days { font-variant-numeric: tabular-nums; }
+
+/* Measure version comparison (F-07) */
+.comparison { margin-top: 16px; display: grid; gap: 12px; }
+.summary { margin: 0; padding: 10px 12px; border-radius: 8px; font-size: 14px; border: 1px solid var(--border); }
+.summary.positive { border-color: var(--green); background: color-mix(in srgb, var(--green) 10%, transparent); }
+.summary.neutral { color: var(--muted); }
+.versions { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.version { border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+.version.best { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+.version-head { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.version-name { font-weight: 600; font-size: 14px; }
+.version-validity { color: var(--muted); font-size: 12px; margin: 2px 0 10px; }
+.badges { display: flex; gap: 6px; }
+.badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); }
+.badge.best { border-color: var(--accent); color: var(--accent); }
+.bar-track { height: 10px; border-radius: 999px; background: var(--background); overflow: hidden; }
+.bar { height: 100%; border-radius: 999px; background: var(--muted); opacity: 0.55; }
+.version.best .bar { background: var(--accent); opacity: 1; }
+.version-figures { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; margin-top: 8px; font-variant-numeric: tabular-nums; }
+.money { font-size: 18px; font-weight: 600; }
+.kwh { color: var(--muted); font-size: 13px; }
+.delta { font-size: 13px; font-weight: 600; }
+.delta.up { color: var(--green); }
+.delta.down { color: var(--red); }
+.delta.flat { color: var(--muted); }
+.not-calculable { font-size: 13px; color: var(--muted); }
+.not-calculable ul { margin: 4px 0 0; padding-left: 18px; }
+.extra-docs { margin-top: 8px; font-size: 12px; color: var(--muted); }
+.footnote { margin: 0; font-size: 12px; color: var(--muted); }

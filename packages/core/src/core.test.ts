@@ -85,10 +85,40 @@ describe("calculation", () => {
 });
 
 describe("version comparator", () => {
+  const data = { vehicle_type: "M1", scrapped_vehicle: true, region: "13-madrid" };
+
   it("picks the version with the highest savings and lists exclusive documents", () => {
-    const c = compareVersions([v1, v2], { vehicle_type: "M1", scrapped_vehicle: true, region: "13-madrid" });
-    expect(c.best).toEqual({ code: "TEST-EV", version: 2, kwh: 7200 });
+    const c = compareVersions([v1, v2], data);
+    expect(c.best).toEqual({ code: "TEST-EV", version: 2, kwh: 7200, payoutEur: null });
     expect(c.versions[1]?.exclusiveDocuments).toEqual(["efficiency_certificate"]);
+  });
+
+  it("turns savings into money and compares against the oldest version by default", () => {
+    const c = compareVersions([v2, v1], data, { pricePerKwh: 0.1 });
+    expect(c.versions.map((v) => v.version)).toEqual([1, 2]);
+    expect(c.versions[0]).toMatchObject({ isBaseline: true, payoutEur: 600, vsBaseline: null });
+    expect(c.versions[1]).toMatchObject({ isBest: true, payoutEur: 720, vsBaseline: { kwh: 1200, eur: 120, percent: 20 } });
+    expect(c.gainVsBaseline).toEqual({ kwh: 1200, eur: 120, percent: 20 });
+  });
+
+  it("uses the case's version as baseline and reports no gain when it is already the best", () => {
+    const c = compareVersions([v1, v2], data, { pricePerKwh: 0.1, baselineVersion: 2 });
+    expect(c.versions[0]?.vsBaseline).toEqual({ kwh: -1200, eur: -120, percent: -16.7 });
+    expect(c.gainVsBaseline).toBeNull();
+  });
+
+  it("keeps versions that cannot be calculated, without money", () => {
+    // v2 with an extra required field that the data does not provide.
+    const v2Extra = parseMeasure({ ...base, version: 2, fields: [...base.fields, { id: "battery_kwh", label: "Battery", type: "number" }] });
+    const c = compareVersions([v1, v2Extra], data, { pricePerKwh: 0.1 });
+    expect(c.versions[0]).toMatchObject({ payoutEur: 600 });
+    expect(c.versions[1]).toMatchObject({ payoutEur: null, vsBaseline: null, isBest: false });
+    expect(c.best?.version).toBe(1);
+  });
+
+  it("rejects an unknown baseline or a negative price", () => {
+    expect(() => compareVersions([v1, v2], data, { baselineVersion: 9 })).toThrow();
+    expect(() => compareVersions([v1, v2], data, { pricePerKwh: -1 })).toThrow();
   });
 });
 

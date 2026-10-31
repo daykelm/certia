@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { Comparison, Field, Measure } from "@certia/core";
 import { REGIONS } from "@certia/shared";
 import { api, ApiError, post } from "./api";
+import { VersionComparison } from "./VersionComparison";
 
 interface MeasureSummary {
   code: string;
@@ -17,8 +18,6 @@ interface TrafficLightItem {
   days: number;
   color: "green" | "amber" | "red";
 }
-
-const formatKwh = (n: number) => `${n.toLocaleString("en-GB")} kWh`;
 
 export function App() {
   const [error, setError] = useState<string>();
@@ -92,13 +91,16 @@ export function App() {
 /** Form generated from the measure's fields (F-03). */
 function Calculator({ measure }: { measure: Measure }) {
   const [data, setData] = useState<Record<string, unknown>>({});
+  // Default price per kWh is only a starting point; each user sets the real market price.
+  const [pricePerKwh, setPricePerKwh] = useState("0.10");
   const [comparison, setComparison] = useState<Comparison>();
   const [errors, setErrors] = useState<string[]>([]);
 
   const calculate = async () => {
     setErrors([]);
     try {
-      setComparison(await post<Comparison>(`/measures/${measure.code}/compare`, { data }));
+      const price = pricePerKwh.trim() === "" ? undefined : Number(pricePerKwh);
+      setComparison(await post<Comparison>(`/measures/${measure.code}/compare`, { data, pricePerKwh: price }));
     } catch (e) {
       setErrors(e instanceof ApiError ? [e.message, ...e.details] : [String(e)]);
     }
@@ -114,6 +116,10 @@ function Calculator({ measure }: { measure: Measure }) {
           onChange={(v) => setData((d) => ({ ...d, [field.id]: v }))}
         />
       ))}
+      <label>
+        Price per kWh (€)
+        <input type="number" min="0" step="0.01" value={pricePerKwh} onChange={(e) => setPricePerKwh(e.target.value)} />
+      </label>
       <button onClick={calculate}>Calculate and compare versions</button>
       {errors.length > 0 && (
         <ul className="errors">
@@ -122,26 +128,7 @@ function Calculator({ measure }: { measure: Measure }) {
           ))}
         </ul>
       )}
-      {comparison && (
-        <table>
-          <thead>
-            <tr>
-              <th>Version</th>
-              <th>Savings</th>
-              <th>Additional documents</th>
-            </tr>
-          </thead>
-          <tbody>
-            {comparison.versions.map((v) => (
-              <tr key={v.version} className={comparison.best?.version === v.version ? "best" : ""}>
-                <td>v{v.version}</td>
-                <td>{v.result.ok ? formatKwh(v.result.kwh) : v.result.errors.join("; ")}</td>
-                <td>{v.exclusiveDocuments.join(", ") || "—"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+      {comparison && <VersionComparison comparison={comparison} />}
     </div>
   );
 }

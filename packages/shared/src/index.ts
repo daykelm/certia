@@ -97,3 +97,12 @@ export type Transition = z.infer<typeof TransitionSchema>;
 export const CalculateSchema = z.object({
   data: z.record(z.unknown()),
 });
+
+/** Price paid per kWh of savings, in euros (F-07). */
+export const PricePerKwhSchema = z.coerce.number().min(0).max(10);
+
+export const CompareSchema = z.object({
+  data: z.record(z.unknown()),
+  pricePerKwh: PricePerKwhSchema.optional(),
+  baselineVersion: z.number().int().positive().optional(),
+});
