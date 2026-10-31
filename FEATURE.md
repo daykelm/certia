@@ -251,7 +251,7 @@ Acceptance criteria:
 | F-20 | Payments to beneficiaries | Account holder validation, duplicate checks, payment status per batch |
 | F-21 | SEPA payment remittances | Remittance file for the bank from approved payments |
 | F-22 | CAE sales and invoicing | Buyers, contracts, invoices |
-| F-23 | Accounting or ERP integration | Depends on each customer's system |
+| F-23 | Accounting integration | Send CAE sales invoices, beneficiary payments and their reconciliation to the customer's accounting software. Details below |
 | F-24 | New measures | Prioritized by demand; the second one very different from the first to validate the engine |
 | F-25 | Visual measure editor | Only if the volume of changes justifies it |
 | F-26 | Automatic reminders to verifiers | Built on the traffic light (F-13) |
@@ -264,6 +264,31 @@ Acceptance criteria:
 | F-33 | Email from the customer's account | Send emails to beneficiaries from the customer's own mailbox (Google or Microsoft) through its API, without storing passwords |
 | F-34 | Case agent | Workflow with AI steps that moves each case forward and proposes; a person confirms. Details below |
 | F-35 | Knowledge base with RAG | Shared regulation with citations and per-organization memory of correction requests. Details below |
+
+### F-23 · Accounting integration
+
+**As** a finance manager, **I want** CAE sales and beneficiary payments to reach our accounting automatically **so that** nobody re-types them and the books always match what happened in Certia.
+
+What flows to accounting:
+
+1. **CAE sales**: invoices to the buyers of the certificates (obligated parties or intermediaries), with VAT, from the sales records of F-22.
+2. **Payments to beneficiaries**: the amount owed for each case once its CAE are issued and sold, and the payment made (F-20, F-21).
+3. **Reconciliation**: bank movements matched to payments and collections, so each case shows whether it has been paid and each sale whether it has been collected.
+
+Built in steps:
+
+1. **Export**: accounting entries and invoices as CSV or Excel files, with a configurable chart of accounts per organization. Works with any accounting software from day one.
+2. **Direct connectors** to the accounting tools most used by customers, chosen from the interviews (for example Holded, Sage, A3 or Odoo), through their APIs.
+3. **Bank reconciliation**: import of bank statements (Norma 43 or CSV) and matching against payments and collections.
+
+Acceptance criteria:
+
+- Each organization configures its accounts (sales, VAT, amounts owed to beneficiaries, bank) and its invoice series.
+- Every entry sent to accounting is linked to its source (case, batch, sale or payment) and recorded as an event (F-02); it is never sent twice.
+- Corrections are made with a reversing entry or a corrective invoice, never by editing what was already sent.
+- Amounts in euros with two decimals; VAT rates configurable.
+- Invoices meet Spanish invoicing requirements; compliance with current e-invoicing rules (such as Verifactu) is checked with an advisor before building.
+- Payment details (IBAN, account holder) stay encrypted (F-16) and only go to accounting or the bank when strictly needed.
 
 ### F-34 · Case agent
 
